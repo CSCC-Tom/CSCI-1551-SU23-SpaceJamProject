@@ -31,43 +31,8 @@ class SpaceJam(ShowBase):
 
         self.title = addTitle("SPACE JAM CLASS EXAMPLE")
 
-        self.universe = SpaceJamClasses.loadAndAddModelObject(
-            self.loader,
-            self.render,
-            "./Assets/Universe/Universe.obj",
-            90000,
-            0,
-            0,
-            0,
-        )
-        self.sun = SpaceJamClasses.loadAndAddModelObject(
-            self.loader,
-            self.render,
-            "./Assets/Planets/protoPlanet.obj",
-            2000,
-            3000,
-            3000,
-            3000,
-            0.95,
-            0.7,
-            0.1,
-        )
-
-        self.mercury = SpaceJamClasses.loadAndAddModelObject(
-            self.loader,
-            self.render,
-            "./Assets/Planets/protoPlanet.obj",
-            7,
-            30,
-            20,
-            10,
-            1.0,
-            0.75,
-            0.75,
-        )
-        SpaceJamClasses.swapTextureForObject(
-            self.loader, self.mercury, "./Assets/Planets/geomPatterns2.png"
-        )
+        self.universe = SpaceJamClasses.SpaceJamUniverse(self.loader, self.render)
+        self.planets = SpaceJamClasses.SpaceJamPlanets(self.loader, self.render)
 
         # Disable Mouse control over camera
         # self.disableMouse()

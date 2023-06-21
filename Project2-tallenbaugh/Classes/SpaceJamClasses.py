@@ -28,5 +28,57 @@ def swapTextureForObject(loader, obj, texture_path):
 
 
 class SpaceJamUniverse(PandaNode):
-    def __init__(self):
+    def __init__(self, loader, render):
         PandaNode.__init__(self, "Universe")
+
+        self.universe = loadAndAddModelObject(
+            loader,
+            render,
+            "./Assets/Universe/Universe.obj",
+            90000,
+            0,
+            0,
+            0,
+        )
+        self.sun = loadAndAddModelObject(
+            loader,
+            render,
+            "./Assets/Planets/protoPlanet.obj",
+            2000,
+            3000,
+            3000,
+            3000,
+            0.95,
+            0.7,
+            0.1,
+        )
+
+
+class SpaceJamPlanets(PandaNode):
+    def __init__(self, loader, render):
+        PandaNode.__init__(self, "Planets")
+
+        self.mercury = loadAndAddModelObject(
+            loader,
+            render,
+            "./Assets/Planets/protoPlanet.obj",
+            7,
+            30,
+            20,
+            10,
+            1.0,
+            0.75,
+            0.75,
+        )
+        self.bbq = loadAndAddModelObject(
+            loader,
+            render,
+            "./Assets/Planets/protoPlanet.obj",
+            14,
+            50,
+            40,
+            30,
+        )
+
+        swapTextureForObject(loader, self.mercury, "./Assets/Planets/geomPatterns2.png")
+        swapTextureForObject(loader, self.bbq, "./Assets/Planets/bbq.jpeg")
