@@ -32,7 +32,7 @@ def loadAndAddModelObject(
 ):
     new_obj = self.loader.loadModel(obj_path)
     new_obj.setScale(scale)
-    new_obj.setColorScale(1.0, 1.0, 1.0, 1.0)
+    new_obj.setColorScale(col_r, col_g, col_b, col_a)
     new_obj.reparentTo(self.render)
     new_obj.setPos(pos_x, pos_y, pos_z)
     return new_obj
@@ -66,15 +66,13 @@ class SpaceJam(ShowBase):
             3000,
             3000,
             3000,
+            0.95,
+            0.7,
+            0.1,
         )
 
         self.mercury = loadAndAddModelObject(
-            self,
-            "./Assets/Planets/protoPlanet.obj",
-            7,
-            30,
-            20,
-            10,
+            self, "./Assets/Planets/protoPlanet.obj", 7, 30, 20, 10, 1.0, 0.75, 0.75
         )
         swapTextureForObject(self, self.mercury, "./Assets/Planets/geomPatterns2.png")
 
