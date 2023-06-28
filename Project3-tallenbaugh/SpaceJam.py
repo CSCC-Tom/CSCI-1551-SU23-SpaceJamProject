@@ -1,10 +1,9 @@
 import sys
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import *
-from direct.task import Task
 from direct.gui.DirectGui import *
 from pandac.PandaModules import TextNode
-from Classes import SpaceJamClasses
+from Classes import SpaceJamClasses, SpaceJamPlayer
 
 
 # Function to put title on the screen.
@@ -26,6 +25,10 @@ class SpaceJam(ShowBase):
 
         sys.exit()
 
+    def assignCoreKeyBindings(self):
+        # start setting key bindings
+        self.accept("escape", self.quit)
+
     def __init__(self):
         ShowBase.__init__(self)
 
@@ -37,14 +40,16 @@ class SpaceJam(ShowBase):
             self.loader, self.render, self.planets.mercury.getPos() + (8, -8, -8)
         )
 
+        self.player = SpaceJamPlayer.SpaceJamPlayerShip(
+            self, self.loader, self.render, self.taskMgr, self.camera
+        )
+
         # Disable Mouse control over camera
         # self.disableMouse()
         # self.camera.setPos(3000.0, 0, 0)
         # ShowBase.use_drive(self)
         # print("Camera position is ")
-
-        # start setting key bindings
-        self.accept("escape", self.quit)
+        self.assignCoreKeyBindings()
 
 
 app = SpaceJam()
