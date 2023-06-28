@@ -1,4 +1,5 @@
 from panda3d.core import PandaNode
+from Classes import SpaceJamFunctions
 
 
 def loadAndAddModelObject(
@@ -97,12 +98,22 @@ class SpaceJamBase(PandaNode):
             pos[1],
             pos[2],
         )
-        self.spawnDefenders(loader, render, 100, 0)
+        self.defenders = []
+        self.spawnDefenders(loader, render, 100, 0, (1, 0, 0, 1))
+        self.spawnDefenders(loader, render, 100, 1, (0, 1, 0, 1))
 
-    def spawnDefenders(self, loader, render, count, pattern):
-        self.defender = SpaceJamDefender(
-            loader, render, self.homebase.getPos() + (1, -1, -1), (1, 0, 0, 1)
-        )
+    def spawnDefenders(self, loader, render, count, pattern, color_tint):
+        if pattern == 0:
+            def_positions = SpaceJamFunctions.SpawnPatternLine(
+                count, self.homebase.getPos(), (1, 1, -1)
+            )
+        elif pattern == 1:
+            def_positions = SpaceJamFunctions.SpawnPatternLineSequence(
+                count, self.homebase.getPos(), (-1, 0, 1), (1, -1, -1)
+            )
+
+        for pos in def_positions:
+            self.defenders.append(SpaceJamDefender(loader, render, pos, color_tint))
 
 
 class SpaceJamDefender(PandaNode):
@@ -113,7 +124,7 @@ class SpaceJamDefender(PandaNode):
             loader,
             render,
             "./Assets/Planets/protoPlanet.obj",
-            0.05,
+            0.5,  # 0.05
             pos[0],
             pos[1],
             pos[2],
