@@ -82,3 +82,43 @@ class SpaceJamPlanets(PandaNode):
 
         swapTextureForObject(loader, self.mercury, "./Assets/Planets/geomPatterns2.png")
         swapTextureForObject(loader, self.bbq, "./Assets/Planets/bbq.jpeg")
+
+
+class SpaceJamBase(PandaNode):
+    def __init__(self, loader, render, pos):
+        PandaNode.__init__(self, "SpaceBase")
+
+        self.homebase = loadAndAddModelObject(
+            loader,
+            render,
+            "./Assets/Universe/Universe.obj",
+            1,
+            pos[0],
+            pos[1],
+            pos[2],
+        )
+        self.spawnDefenders(loader, render, 100, 0)
+
+    def spawnDefenders(self, loader, render, count, pattern):
+        self.defender = SpaceJamDefender(
+            loader, render, self.homebase.getPos() + (1, -1, -1), (1, 0, 0, 1)
+        )
+
+
+class SpaceJamDefender(PandaNode):
+    def __init__(self, loader, render, pos, col_tint):
+        PandaNode.__init__(self, "SpaceBaseDefender")
+
+        self.obj = loadAndAddModelObject(
+            loader,
+            render,
+            "./Assets/Planets/protoPlanet.obj",
+            0.05,
+            pos[0],
+            pos[1],
+            pos[2],
+            col_tint[0],
+            col_tint[1],
+            col_tint[2],
+            col_tint[3],
+        )

@@ -33,6 +33,9 @@ class SpaceJam(ShowBase):
 
         self.universe = SpaceJamClasses.SpaceJamUniverse(self.loader, self.render)
         self.planets = SpaceJamClasses.SpaceJamPlanets(self.loader, self.render)
+        self.baseA = SpaceJamClasses.SpaceJamBase(
+            self.loader, self.render, self.planets.mercury.getPos() + (8, -8, -8)
+        )
 
         # Disable Mouse control over camera
         # self.disableMouse()
