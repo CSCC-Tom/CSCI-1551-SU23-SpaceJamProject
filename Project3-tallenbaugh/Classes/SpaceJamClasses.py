@@ -1,12 +1,12 @@
-from panda3d.core import PandaNode
+from panda3d.core import PandaNode, Loader, NodePath, Texture, Vec3, LColor
 from Classes import SpaceJamFunctions
 
 
 def loadAndAddModelObject(
-    loader,
-    render,
-    obj_path,
-    scale=1,
+    loader: Loader,
+    render: NodePath,
+    obj_path: str,
+    scale=1.0,
     pos_x=0.0,
     pos_y=0.0,
     pos_z=0.0,
@@ -14,22 +14,34 @@ def loadAndAddModelObject(
     col_g=1.0,
     col_b=1.0,
     col_a=1.0,
-):
-    new_obj = loader.loadModel(obj_path)
-    new_obj.setScale(scale)
-    new_obj.setColorScale(col_r, col_g, col_b, col_a)
-    new_obj.reparentTo(render)
-    new_obj.setPos(pos_x, pos_y, pos_z)
-    return new_obj
+) -> NodePath:
+    new_obj: NodePath = loader.loadModel(obj_path)
+    if isinstance(new_obj, NodePath):
+        new_obj.setScale(scale)
+        new_obj.setColorScale(col_r, col_g, col_b, col_a)
+        new_obj.reparentTo(render)
+        new_obj.setPos(pos_x, pos_y, pos_z)
+
+        return new_obj
+    raise AssertionError(
+        "loader.loadModel(" + obj_path + ") did not return a proper NodePath!"
+    )
 
 
-def swapTextureForObject(loader, obj, texture_path):
-    texture = loader.loadTexture(texture_path)
-    obj.setTexture(texture)
+def swapTextureForObject(loader: Loader, obj: NodePath, texture_path: str):
+    texture: Texture = loader.loadTexture(texture_path)
+    if isinstance(texture, Texture):
+        obj.setTexture(texture)
+    else:
+        raise AssertionError(
+            "swapTextureForObject passed texture_path of "
+            + texture_path
+            + ", loader.loadTexture could not load a valid Texture from it!"
+        )
 
 
 class SpaceJamUniverse(PandaNode):
-    def __init__(self, loader, render):
+    def __init__(self, loader: Loader, render: NodePath):
         PandaNode.__init__(self, "Universe")
 
         self.universe = loadAndAddModelObject(
@@ -56,7 +68,7 @@ class SpaceJamUniverse(PandaNode):
 
 
 class SpaceJamPlanets(PandaNode):
-    def __init__(self, loader, render):
+    def __init__(self, loader: Loader, render: NodePath):
         PandaNode.__init__(self, "Planets")
 
         self.mercury = loadAndAddModelObject(
@@ -86,7 +98,7 @@ class SpaceJamPlanets(PandaNode):
 
 
 class SpaceJamBase(PandaNode):
-    def __init__(self, loader, render, pos):
+    def __init__(self, loader: Loader, render: NodePath, pos: Vec3):
         PandaNode.__init__(self, "SpaceBase")
 
         self.homebase = loadAndAddModelObject(
@@ -98,11 +110,18 @@ class SpaceJamBase(PandaNode):
             pos[1],
             pos[2],
         )
-        self.defenders = []
+        self.defenders: list[SpaceJamDefender] = []
         self.spawnDefenders(loader, render, 100, 0, (1, 0, 0, 1))
         self.spawnDefenders(loader, render, 100, 1, (0, 1, 0, 1))
 
-    def spawnDefenders(self, loader, render, count, pattern, color_tint):
+    def spawnDefenders(
+        self,
+        loader: Loader,
+        render: NodePath,
+        count: int,
+        pattern: int,
+        color_tint: LColor,
+    ):
         if pattern == 0:
             def_positions = SpaceJamFunctions.SpawnPatternLine(
                 count, self.homebase.getPos(), (1, 1, -1)
@@ -117,7 +136,7 @@ class SpaceJamBase(PandaNode):
 
 
 class SpaceJamDefender(PandaNode):
-    def __init__(self, loader, render, pos, col_tint):
+    def __init__(self, loader: Loader, render: NodePath, pos: Vec3, col_tint: LColor):
         PandaNode.__init__(self, "SpaceBaseDefender")
 
         self.obj = loadAndAddModelObject(

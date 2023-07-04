@@ -1,13 +1,13 @@
 import sys
 from direct.showbase.ShowBase import ShowBase
-from panda3d.core import *
+from panda3d.core import NodePath
 from direct.gui.DirectGui import *
 from pandac.PandaModules import TextNode
 from Classes import SpaceJamClasses, SpaceJamPlayer
 
 
 # Function to put title on the screen.
-def addTitle(text):
+def addTitle(text: str):
     return OnscreenText(
         text=text,
         style=1,
@@ -22,12 +22,16 @@ class SpaceJam(ShowBase):
     # Prepare message if server wants to quit
     def quit(self):
         ## Network contacts will go here
-
         sys.exit()
 
     def assignCoreKeyBindings(self):
         # start setting key bindings
         self.accept("escape", self.quit)
+
+    def assignPlayerKeyBindings(self):
+        # start setting key bindings
+        self.accept("arrow_right", self.player.headingClockwiseKeyEvent, [1])
+        self.accept("arrow_right-up", self.player.headingClockwiseKeyEvent, [0])
 
     def __init__(self):
         ShowBase.__init__(self)
@@ -40,9 +44,13 @@ class SpaceJam(ShowBase):
             self.loader, self.render, self.planets.mercury.getPos() + (8, -8, -8)
         )
 
-        self.player = SpaceJamPlayer.SpaceJamPlayerShip(
-            self, self.loader, self.render, self.taskMgr, self.camera
-        )
+        if isinstance(self.camera, NodePath):
+            self.player = SpaceJamPlayer.SpaceJamPlayerShip(
+                self.loader, self.render, self.taskMgr, self.camera
+            )
+            self.assignPlayerKeyBindings()
+        else:
+            raise AssertionError("Game did not have a valid camera!")
 
         # Disable Mouse control over camera
         # self.disableMouse()

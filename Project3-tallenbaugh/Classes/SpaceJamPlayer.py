@@ -1,16 +1,18 @@
-from panda3d.core import PandaNode
+from panda3d.core import PandaNode, Loader, NodePath
 from Classes import SpaceJamClasses
 from direct.task import Task
 from pandac.PandaModules import Vec3
+from direct.task.Task import TaskManager
 
 
 class SpaceJamPlayerShip(PandaNode):
-    def assignPlayerKeyBindings(self, space_jam_game):
-        # start setting key bindings
-        space_jam_game.accept("arrow_right", self.headingClockwiseKeyEvent, [1])
-        space_jam_game.accept("arrow_right-up", self.headingClockwiseKeyEvent, [0])
-
-    def __init__(self, space_jam_game, loader, render, taskMgr, camera):
+    def __init__(
+        self,
+        loader: Loader,
+        render: NodePath,
+        taskMgr: TaskManager,
+        camera: NodePath,
+    ):
         PandaNode.__init__(self, "Player")
         self.shipObj = SpaceJamClasses.loadAndAddModelObject(
             loader,
@@ -28,12 +30,10 @@ class SpaceJamPlayerShip(PandaNode):
         self.render = render
         self.camera = camera
 
-        self.assignPlayerKeyBindings(space_jam_game)
-
         # Add the updateCameraTask procedure to the task manager.
         self.taskMgr.add(self.updatePlayerCameraTask, "UpdateCameraTask")
 
-    def headingClockwiseKeyEvent(self, keydown):
+    def headingClockwiseKeyEvent(self, keydown: int):
         if keydown:
             self.taskMgr.add(
                 self.rotateShipHeadingClockwise, "rotateShipHeadingClockwise"
@@ -41,13 +41,13 @@ class SpaceJamPlayerShip(PandaNode):
         else:
             self.taskMgr.remove("rotateShipHeadingClockwise")
 
-    def rotateShipHeadingClockwise(self, task):
+    def rotateShipHeadingClockwise(self, task: Task):
         rate = 2
         self.shipObj.setH(self.shipObj.getH() - rate)
         return task.cont
 
     # Define a procedure to move the camera.
-    def updatePlayerCameraTask(self, task):
+    def updatePlayerCameraTask(self, task: Task):
         # angleDegrees = task.time * 6.0
         # angleRadians = angleDegrees * (pi / 180.0)
         player_pos = self.shipObj.getPos()
@@ -57,4 +57,4 @@ class SpaceJamPlayerShip(PandaNode):
         self.camera.lookAt(player_pos)
         self.camera.setPos(self.camera.getPos() + player_up)
         # self.camera.setHpr(angleDegrees, 0, 0)
-        return Task.cont
+        return task.cont
