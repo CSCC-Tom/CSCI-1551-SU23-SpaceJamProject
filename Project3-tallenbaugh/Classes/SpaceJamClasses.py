@@ -6,21 +6,16 @@ def loadAndAddModelObject(
     loader: Loader,
     render: NodePath,
     obj_path: str,
-    scale=1.0,
-    pos_x=0.0,
-    pos_y=0.0,
-    pos_z=0.0,
-    col_r=1.0,
-    col_g=1.0,
-    col_b=1.0,
-    col_a=1.0,
+    scale: float = 1.0,
+    pos: Vec3 = (0.0, 0.0, 0.0),
+    col: LColor = (1.0, 1.0, 1.0, 1.0),
 ) -> NodePath:
     new_obj: NodePath = loader.loadModel(obj_path)
     if isinstance(new_obj, NodePath):
         new_obj.setScale(scale)
-        new_obj.setColorScale(col_r, col_g, col_b, col_a)
+        new_obj.setColorScale(col)
         new_obj.reparentTo(render)
-        new_obj.setPos(pos_x, pos_y, pos_z)
+        new_obj.setPos(pos)
 
         return new_obj
     raise AssertionError(
@@ -45,25 +40,15 @@ class SpaceJamUniverse(PandaNode):
         PandaNode.__init__(self, "Universe")
 
         self.universe = loadAndAddModelObject(
-            loader,
-            render,
-            "./Assets/Universe/Universe.obj",
-            90000,
-            0,
-            0,
-            0,
+            loader, render, "./Assets/Universe/Universe.obj", 90000
         )
         self.sun = loadAndAddModelObject(
             loader,
             render,
             "./Assets/Planets/protoPlanet.obj",
             2000,
-            3000,
-            3000,
-            3000,
-            0.95,
-            0.7,
-            0.1,
+            (3000, 3000, 3000),
+            (0.95, 0.7, 0.1, 1.0),
         )
 
 
@@ -76,21 +61,11 @@ class SpaceJamPlanets(PandaNode):
             render,
             "./Assets/Planets/protoPlanet.obj",
             7,
-            30,
-            20,
-            10,
-            1.0,
-            0.75,
-            0.75,
+            (30, 20, 10),
+            (1.0, 0.75, 0.75, 1.0),
         )
         self.bbq = loadAndAddModelObject(
-            loader,
-            render,
-            "./Assets/Planets/protoPlanet.obj",
-            14,
-            50,
-            40,
-            30,
+            loader, render, "./Assets/Planets/protoPlanet.obj", 14, (50, 40, 30)
         )
 
         swapTextureForObject(loader, self.mercury, "./Assets/Planets/geomPatterns2.png")
@@ -102,13 +77,7 @@ class SpaceJamBase(PandaNode):
         PandaNode.__init__(self, "SpaceBase")
 
         self.homebase = loadAndAddModelObject(
-            loader,
-            render,
-            "./Assets/Universe/Universe.obj",
-            1,
-            pos[0],
-            pos[1],
-            pos[2],
+            loader, render, "./Assets/Universe/Universe.obj", 1, pos
         )
         self.defenders: list[SpaceJamDefender] = []
         self.spawnDefenders(loader, render, 100, 0, (1, 0, 0, 1))
@@ -144,11 +113,6 @@ class SpaceJamDefender(PandaNode):
             render,
             "./Assets/Planets/protoPlanet.obj",
             0.5,  # 0.05
-            pos[0],
-            pos[1],
-            pos[2],
-            col_tint[0],
-            col_tint[1],
-            col_tint[2],
-            col_tint[3],
+            pos,
+            col_tint,
         )

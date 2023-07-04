@@ -19,12 +19,8 @@ class SpaceJamPlayerShip(PandaNode):
             render,
             "./Assets/Planets/protoPlanet.obj",
             0.3,
-            0,
-            0,
-            0,
-            0.95,
-            0.7,
-            0.8,
+            (0, 0, 0),
+            (0.95, 0.7, 0.8, 1.0),
         )
         self.taskMgr = taskMgr
         self.render = render
