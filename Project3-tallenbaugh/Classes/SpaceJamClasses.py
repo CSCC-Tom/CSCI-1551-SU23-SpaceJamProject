@@ -3,48 +3,58 @@ from Classes import SpaceJamFunctions
 
 
 def loadAndAddModelObject(
-    loader: Loader,
-    render: NodePath,
-    obj_path: str,
+    loader,
+    parent: NodePath,
+    model_asset_path: str,
     scale: float = 1.0,
     pos: Vec3 = (0.0, 0.0, 0.0),
     col: LColor = (1.0, 1.0, 1.0, 1.0),
 ) -> NodePath:
-    new_obj: NodePath = loader.loadModel(obj_path)
-    if isinstance(new_obj, NodePath):
-        new_obj.setScale(scale)
-        new_obj.setColorScale(col)
-        new_obj.reparentTo(render)
-        new_obj.setPos(pos)
+    """loadAndAddModelObject is a function that anything in the game can use to create a NodePath for itself out of a model.
 
-        return new_obj
-    raise AssertionError(
-        "loader.loadModel(" + obj_path + ") did not return a proper NodePath!"
-    )
+    This NodePath should be saved to a self.variable if intended for dynamic logic"""
+    new_node_path: NodePath = loader.loadModel(model_asset_path)
+
+    if not isinstance(new_node_path, NodePath):
+        raise AssertionError(
+            "loader.loadModel("
+            + model_asset_path
+            + ") did not return a proper PandaNode!"
+        )
+    new_node_path.reparentTo(parent)
+    new_node_path.setScale(scale)
+    new_node_path.setColorScale(col)
+    new_node_path.setPos(pos)
+
+    return new_node_path
 
 
-def swapTextureForObject(loader: Loader, obj: NodePath, texture_path: str):
+def swapTextureForObject(loader, obj: NodePath, texture_path: str):
     texture: Texture = loader.loadTexture(texture_path)
-    if isinstance(texture, Texture):
-        obj.setTexture(texture)
-    else:
+
+    if not isinstance(texture, Texture):
         raise AssertionError(
             "swapTextureForObject passed texture_path of "
             + texture_path
             + ", loader.loadTexture could not load a valid Texture from it!"
         )
 
+    obj.setTexture(texture)
+
 
 class SpaceJamUniverse(PandaNode):
-    def __init__(self, loader: Loader, render: NodePath):
+    def __init__(self, loader: Loader, scene_node: NodePath):
         PandaNode.__init__(self, "Universe")
 
         self.universe = loadAndAddModelObject(
-            loader, render, "./Assets/Universe/Universe.obj", 90000
+            loader, scene_node, "./Assets/Universe/Universe.obj", 90000
+        )
+        self.something = loadAndAddModelObject(
+            loader, scene_node, "./Assets/Planets/protoPlanet.obj", 30, (0, 0, 99000)
         )
         self.sun = loadAndAddModelObject(
             loader,
-            render,
+            self.universe,
             "./Assets/Planets/protoPlanet.obj",
             2000,
             (3000, 3000, 3000),
