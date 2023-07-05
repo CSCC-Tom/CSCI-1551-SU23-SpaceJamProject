@@ -31,8 +31,20 @@ class SpaceJam(ShowBase):
 
     def assignPlayerKeyBindings(self):
         """Key bindings that are specific to the Player"""
-        self.accept("arrow_right", self.player.headingClockwiseKeyEvent, [1])
-        self.accept("arrow_right-up", self.player.headingClockwiseKeyEvent, [0])
+        self.accept("arrow_right", self.player.headingCWKeyEvent, [1])
+        self.accept("arrow_right-up", self.player.headingCWKeyEvent, [0])
+        self.accept("arrow_left", self.player.headingCCWKeyEvent, [1])
+        self.accept("arrow_left-up", self.player.headingCCWKeyEvent, [0])
+        self.accept("arrow_up", self.player.pitchCWKeyEvent, [1])
+        self.accept("arrow_up-up", self.player.pitchCWKeyEvent, [0])
+        self.accept("arrow_down", self.player.pitchCCWKeyEvent, [1])
+        self.accept("arrow_down-up", self.player.pitchCCWKeyEvent, [0])
+        self.accept("a", self.player.rollCWKeyEvent, [1])
+        self.accept("a-up", self.player.rollCWKeyEvent, [0])
+        self.accept("d", self.player.rollCCWKeyEvent, [1])
+        self.accept("d-up", self.player.rollCCWKeyEvent, [0])
+        self.accept("space", self.player.thrustKeyEvent, [1])
+        self.accept("space-up", self.player.thrustKeyEvent, [0])
 
     def __init__(self):
         ShowBase.__init__(self)

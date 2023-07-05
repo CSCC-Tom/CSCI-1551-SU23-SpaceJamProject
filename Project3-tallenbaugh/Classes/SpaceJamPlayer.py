@@ -29,17 +29,119 @@ class SpaceJamPlayerShip(PandaNode):
         # Add the updateCameraTask procedure to the task manager.
         self.taskMgr.add(self.updatePlayerCameraTask, "UpdateCameraTask")
 
-    def headingClockwiseKeyEvent(self, keydown: int):
-        if keydown:
-            self.taskMgr.add(
-                self.rotateShipHeadingClockwise, "rotateShipHeadingClockwise"
-            )
-        else:
-            self.taskMgr.remove("rotateShipHeadingClockwise")
+        self.rotationRate = 2
+        self.thrustRate = 1
 
-    def rotateShipHeadingClockwise(self, task: Task):
-        rate = 2
-        self.shipObj.setH(self.shipObj.getH() - rate)
+        self.lookTarget = NodePath("Player Look Target")
+        self.lookTarget.setPosHpr(self.shipObj.getPos(), self.shipObj.getHpr())
+
+    def getShipPos(self):
+        return self.shipObj.getPos()
+
+    def getShipForward(self):
+        return self.render.getRelativeVector(self.shipObj, Vec3(0, 1, 0))
+
+    def getShipRight(self):
+        return self.render.getRelativeVector(self.shipObj, Vec3(1, 0, 0))
+
+    def getShipUp(self):
+        return self.render.getRelativeVector(self.shipObj, Vec3(0, 0, 1))
+
+    # HEADING
+    def headingCWKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.rotateShipHeadingCW, "rotateShipHeadingCW")
+        else:
+            self.taskMgr.remove("rotateShipHeadingCW")
+
+    def rotateShipHeadingCW(self, task: Task):
+        self.lookTarget.setPos(
+            self.getShipPos() + (self.getShipForward() * 50) + self.getShipRight()
+        )
+        self.shipObj.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        print("Rotate CW -- Curr Heading = " + str(self.shipObj.getH()))
+        return task.cont
+
+    def headingCCWKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.rotateShipHeadingCCW, "rotateShipHeadingCCW")
+        else:
+            self.taskMgr.remove("rotateShipHeadingCCW")
+
+    def rotateShipHeadingCCW(self, task: Task):
+        self.lookTarget.setPos(
+            self.getShipPos() + (self.getShipForward() * 50) - self.getShipRight()
+        )
+        self.shipObj.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        print("Rotate CCW -- Curr Heading = " + str(self.shipObj.getH()))
+        return task.cont
+
+    # PITCH
+    def pitchCWKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.rotateShipPitchCW, "rotateShipPitchCW")
+        else:
+            self.taskMgr.remove("rotateShipPitchCW")
+
+    def rotateShipPitchCW(self, task: Task):
+        self.lookTarget.setPos(
+            self.getShipPos() + (self.getShipForward() * 50) + self.getShipUp()
+        )
+        self.shipObj.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        print("Rotate CW -- Curr Pitch = " + str(self.shipObj.getP()))
+
+        return task.cont
+
+    def pitchCCWKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.rotateShipPitchCCW, "rotateShipPitchCCW")
+        else:
+            self.taskMgr.remove("rotateShipPitchCCW")
+
+    def rotateShipPitchCCW(self, task: Task):
+        self.lookTarget.setPos(
+            self.getShipPos() + (self.getShipForward() * 50) - self.getShipUp()
+        )
+        self.shipObj.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        print("Rotate CW -- Curr Pitch = " + str(self.shipObj.getP()))
+
+        return task.cont
+
+    # ROLL
+    def rollCWKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.rotateShipRollCW, "rotateShipRollCW")
+        else:
+            self.taskMgr.remove("rotateShipRollCW")
+
+    def rotateShipRollCW(self, task: Task):
+        curr_r = self.shipObj.getR() % 360
+        print("Rotate CW -- Curr Roll = " + str(curr_r))
+        self.shipObj.setR(curr_r - self.rotationRate)
+        return task.cont
+
+    def rollCCWKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.rotateShipRollCCW, "rotateShipRollCCW")
+        else:
+            self.taskMgr.remove("rotateShipRollCCW")
+
+    def rotateShipRollCCW(self, task: Task):
+        curr_r = self.shipObj.getR() % 360
+        print("Rotate CCW -- Curr Roll = " + str(curr_r))
+        self.shipObj.setR(curr_r + self.rotationRate)
+        return task.cont
+
+    # THRUST
+    def thrustKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.addShipThrust, "addShipThrust")
+        else:
+            self.taskMgr.remove("addShipThrust")
+
+    def addShipThrust(self, task: Task):
+        self.shipObj.setPos(self.shipObj.getPos() + self.getShipForward())
+        # self.shipObj.setR(self.shipObj.getR() - self.rotationRate)
         return task.cont
 
     # Define a procedure to move the camera.
@@ -49,8 +151,8 @@ class SpaceJamPlayerShip(PandaNode):
         player_pos = self.shipObj.getPos()
         player_forward = self.render.getRelativeVector(self.shipObj, Vec3(0, 6, 0))
         player_up = self.render.getRelativeVector(self.shipObj, Vec3(0, 0, 1))
-        self.camera.setPos(player_pos - player_forward)
-        self.camera.lookAt(player_pos)
-        self.camera.setPos(self.camera.getPos() + player_up)
-        # self.camera.setHpr(angleDegrees, 0, 0)
+        self.camera.setPos(player_pos - player_forward + player_up)
+        # self.camera.headsUp(player_pos, player_up)
+        # self.camera.setPos(self.camera.getPos() )
+        self.camera.setHpr(self.shipObj.getHpr())
         return task.cont
