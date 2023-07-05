@@ -26,25 +26,25 @@ class SpaceJam(ShowBase):
         )
 
     def assignCoreKeyBindings(self):
-        """Key bindings that involve very core functions"""
+        """Key bindings that involve very core game functions. Currently maps the escape key to the Quit function."""
         self.accept("escape", quit)
 
-    def assignPlayerKeyBindings(self):
-        """Key bindings that are specific to the Player"""
-        self.accept("arrow_right", self.player.headingCWKeyEvent, [1])
-        self.accept("arrow_right-up", self.player.headingCWKeyEvent, [0])
-        self.accept("arrow_left", self.player.headingCCWKeyEvent, [1])
-        self.accept("arrow_left-up", self.player.headingCCWKeyEvent, [0])
-        self.accept("arrow_up", self.player.pitchCWKeyEvent, [1])
-        self.accept("arrow_up-up", self.player.pitchCWKeyEvent, [0])
-        self.accept("arrow_down", self.player.pitchCCWKeyEvent, [1])
-        self.accept("arrow_down-up", self.player.pitchCCWKeyEvent, [0])
-        self.accept("a", self.player.rollCWKeyEvent, [1])
-        self.accept("a-up", self.player.rollCWKeyEvent, [0])
-        self.accept("d", self.player.rollCCWKeyEvent, [1])
-        self.accept("d-up", self.player.rollCCWKeyEvent, [0])
-        self.accept("space", self.player.thrustKeyEvent, [1])
-        self.accept("space-up", self.player.thrustKeyEvent, [0])
+    def assignPlayerKeyBindings(self, player: SpaceJamPlayer.SpaceJamPlayerShip):
+        """Key bindings between the hardware and the player functions; arrow keys for Heading and Pitch, a/d for Roll, space for Thrust"""
+        self.accept("arrow_right", player.headingCWKeyEvent, [1])
+        self.accept("arrow_right-up", player.headingCWKeyEvent, [0])
+        self.accept("arrow_left", player.headingCCWKeyEvent, [1])
+        self.accept("arrow_left-up", player.headingCCWKeyEvent, [0])
+        self.accept("arrow_up", player.pitchCWKeyEvent, [1])
+        self.accept("arrow_up-up", player.pitchCWKeyEvent, [0])
+        self.accept("arrow_down", player.pitchCCWKeyEvent, [1])
+        self.accept("arrow_down-up", player.pitchCCWKeyEvent, [0])
+        self.accept("a", player.rollCWKeyEvent, [1])
+        self.accept("a-up", player.rollCWKeyEvent, [0])
+        self.accept("d", player.rollCCWKeyEvent, [1])
+        self.accept("d-up", player.rollCCWKeyEvent, [0])
+        self.accept("space", player.thrustKeyEvent, [1])
+        self.accept("space-up", player.thrustKeyEvent, [0])
 
     def __init__(self):
         ShowBase.__init__(self)
@@ -54,9 +54,11 @@ class SpaceJam(ShowBase):
         self.assignCoreKeyBindings()
 
         self.universe = SpaceJamClasses.SpaceJamUniverse(self.loader, self.render)
-        self.planets = SpaceJamClasses.SpaceJamPlanets(self.loader, self.render)
+        self.planets = SpaceJamClasses.SpaceJamSolarSystem(self.loader, self.render)
         self.baseA = SpaceJamClasses.SpaceJamBase(
-            self.loader, self.render, self.planets.mercury.getPos() + (8, -8, -8)
+            self.loader,
+            self.render,
+            self.planets.mercury.modelNode.getPos() + (8, -8, -8),
         )
 
         if self.camera == None:
@@ -65,7 +67,9 @@ class SpaceJam(ShowBase):
         self.player = SpaceJamPlayer.SpaceJamPlayerShip(
             self.loader, self.render, self.taskMgr, self.camera
         )
-        self.assignPlayerKeyBindings()
+        # Moves the ship somewhere reasonable outside of the Sun
+        self.player.shipObj.setPos((50, 60, 30))
+        self.assignPlayerKeyBindings(self.player)
 
 
 app = SpaceJam()
