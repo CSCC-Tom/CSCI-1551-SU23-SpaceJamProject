@@ -1,8 +1,9 @@
 from panda3d.core import Loader, NodePath
-from Classes import BaseClasses, CollisionBaseClasses
+from Classes import BaseClasses, CollisionBaseClasses, PlayerPhaser
 from direct.task import Task
 from pandac.PandaModules import Vec3
 from direct.task.Task import TaskManager
+from direct.interval.LerpInterval import LerpPosInterval
 
 DEFAULT_PLAYER_ROTATION_RATE = 2
 DEFAULT_PLAYER_THRUST_RATE = 1
@@ -19,13 +20,16 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
         camera: NodePath,
     ):
         BaseClasses.ModelObject.__init__(
-            self, loader, "./Assets/Planets/protoPlanet.obj", scene_node, "Player"
+            self, loader, "./Assets/TheBorg/theBorg.egg", scene_node, "Player"
         )
         CollisionBaseClasses.SphereCollider.__init__(self, self.modelNode, "Player")
+
+        self.modelNode.setScale(0.1)
 
         self.replaceTextureOnModel(
             loader, "./Assets/Planets/angryPlanet.jpg", (0.95, 0.7, 0.8, 1.0)
         )
+        self.loader = loader
         self.taskMgr = taskMgr
         self.scene_node = scene_node
         self.camera = camera
@@ -40,6 +44,9 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
         # empty-object target to help the ship stay oriented in desired rotations without fancy Euler logic
         self.lookTarget = NodePath("Player Look Target")
         self.lookTarget.setPosHpr(self.modelNode.getPos(), self.modelNode.getHpr())
+
+        # Phaser / Missile Attributes
+        self.missilesReady = 1
 
     # CONVENIENCE FUNCTIONS to make other functions more concise and self-describing.
     def getShipPos(self):
@@ -102,7 +109,7 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
         else:
             self.taskMgr.remove("addShipThrust")
 
-    # ACTION HELPERS
+    # MOVEMENT ACTION HELPERS
     # Called every frame by the Key Event Input Helper tasks
     # Rotation functions are moving an empty invisible "lookTarget" object and making the ship look at it.
     # The advantage of this over get/setH/P/R is that the raw HPR functions are based on absolute world space, and the math is kind of hard.
@@ -185,9 +192,31 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
 
         # Move the camera behind, and a little above, the ship. Could space this out over multiple task updates for a more "drifty-feeling" camera.
         self.camera.setPos(
-            self.getShipPos() - (self.getShipForward() * 6) + self.getShipUp()
+            self.getShipPos() - (self.getShipForward() * 24) + (self.getShipUp() * 4)
         )
 
         # Make the camera match the ship's rotation exactly. (Could use headsUp or lookAt similarly, if you want the camera to look at the player rather than look where the player is looking.)
         self.camera.setHpr(self.modelNode.getHpr())
         return task.cont
+
+    # MISSILE / PHASER STUFF
+    def fireMissileIfReady(self):
+        """If self.missilesReady > 0, then we prep and spawn and kick off a missile/phaser"""
+        if self.missilesReady > 0:
+            self.activeMissile = PlayerPhaser.PlayerPhaser(self.loader, self.scene_node)
+            missileStartPos = self.modelNode.getPos() + (self.getShipForward() * 5)
+            self.activeMissile.modelNode.setPos(missileStartPos)
+            missileTargetPos = self.modelNode.getPos() + (self.getShipForward() * 500)
+            self.missilesReady = self.missilesReady - 1
+            self.activeMissile.fireInterval = LerpPosInterval(
+                self.activeMissile.modelNode,
+                2,
+                missileTargetPos,
+                missileStartPos,
+                None,
+                "noBlend",
+                1,
+                1,
+                "missileFireInterval",
+            )
+            self.activeMissile.fireInterval.start()

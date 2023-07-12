@@ -119,7 +119,11 @@ class SpaceJamBase(CollisionBaseClasses.CapsuleCollider):
             )
         elif pattern == 1:
             def_positions = SpaceJamFunctions.CreateLineOfLinePatternsPositionsList(
-                count, count, Vec3(0, 0, 0), Vec3(-1, 0, 1), Vec3(1, -1, -1)
+                int(count * 0.5),
+                int(count * 0.5),
+                Vec3(0, 0, 0),
+                Vec3(-1, 0, 1),
+                Vec3(1, -1, -1),
             )
         for pos in def_positions:
             # print("Spawned defender in pattern " + str(pattern) + " at pos " + str(pos))

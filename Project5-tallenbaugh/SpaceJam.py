@@ -57,7 +57,8 @@ class SpaceJam(ShowBase):
             + "[arrow_down] -> turn pitch down/ccw\n"
             + "[a] -> turn roll left/ccw\n"
             + "[d] -> turn roll right/cw\n"
-            + "[space] -> thrust / move forward"
+            + "[space] -> thrust / move forward\n"
+            + "[f] -> fire missile (if missile is ready)"
         )
         self.playerKeyInstructions = OnscreenText(
             text=instructions_text,
@@ -116,6 +117,7 @@ class SpaceJam(ShowBase):
         self.accept("d-up", self.player.rollCWKeyEvent, [0])
         self.accept("space", self.player.thrustKeyEvent, [1])
         self.accept("space-up", self.player.thrustKeyEvent, [0])
+        self.accept("f", self.player.fireMissileIfReady)
         self.addOnscreenPlayerKeyBindings()
 
     def preparePlayerTraverser(self):
