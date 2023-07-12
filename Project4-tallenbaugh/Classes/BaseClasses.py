@@ -3,7 +3,7 @@ from panda3d.core import PandaNode, NodePath, Texture, Vec3, LColor
 # Not to be confused with a "Base" that spawns defenders, this script provides the superclass(es) that all other game classes inherit from.
 
 
-class ObjectWithModel(PandaNode, object):
+class ModelObject(PandaNode):
     """PandaNode object with a primary NodePath called modelNode, that also offers functions to load and modify the model."""
 
     def __init__(self, loader, model_path: str, parent_node: NodePath, node_name: str):

@@ -5,17 +5,18 @@ from Classes import SpaceJamFunctions, BaseClasses, CollisionBaseClasses
 # (Large classes belong in their own script files!)
 
 
-class SpaceJamUniverse(BaseClasses.ObjectWithModel):
+class SpaceJamUniverse(BaseClasses.ModelObject, CollisionBaseClasses.SphereCollider):
     """ObjectWithModel representing the Universe (skybox)"""
 
     def __init__(self, loader: Loader, scene_node: NodePath):
-        super(SpaceJamUniverse, self).__init__(
-            loader, "./Assets/Universe/Universe.obj", scene_node, "Universe"
+        BaseClasses.ModelObject.__init__(
+            self, loader, "./Assets/Universe/Universe.obj", scene_node, "Universe"
         )
+        CollisionBaseClasses.SphereCollider.__init__(self, self.modelNode, "Universe")
         self.modelNode.setScale(90000)
 
 
-class SpaceJamPlanet(CollisionBaseClasses.SphereCollidableObject):
+class SpaceJamPlanet(BaseClasses.ModelObject, CollisionBaseClasses.SphereCollider):
     """SphereCollidableObject representing a Planet"""
 
     def __init__(
@@ -27,9 +28,11 @@ class SpaceJamPlanet(CollisionBaseClasses.SphereCollidableObject):
         position: Vec3,
         scale: float,
     ):
-        super(SpaceJamPlanet, self).__init__(
-            loader, model_path, parent_node, node_name, (0, 0, 0), 1
+        BaseClasses.ModelObject.__init__(
+            self, loader, model_path, parent_node, node_name
         )
+        CollisionBaseClasses.SphereCollider.__init__(self, self.modelNode, node_name)
+
         # Note position of 0 above to make sure the collider matches visual position, and then both are moved by moving the parent modelNode.
         self.modelNode.setPos(position)
         # Note scale of 1 above to make sure the collider matches visual size, and THEN we scale both up together by scaling the parent modelNode.
@@ -74,22 +77,30 @@ class SpaceJamSolarSystem(PandaNode):
         self.bbq.replaceTextureOnModel(loader, "./Assets/Planets/bbq.jpeg")
 
 
-class SpaceJamBase(CollisionBaseClasses.SphereCollidableObject):
+class SpaceJamBase(CollisionBaseClasses.CapsuleCollider):
     """SphereCollidableObject that also manages a swarm of Defenders"""
 
     def __init__(self, loader: Loader, parent_node: NodePath, pos: Vec3):
         super(SpaceJamBase, self).__init__(
-            loader,
-            "./Assets/Universe/Universe.obj",
             parent_node,
-            "SpaceBase",
+            "SpaceBaseA",
+            (0, 0, 0),
+            (0.75, 0, 0),
         )
+        self.baseModelA = BaseClasses.ModelObject(
+            loader, "./Assets/Universe/Universe.obj", self.cNode, "SpaceBaseA"
+        )
+        self.baseModelB = BaseClasses.ModelObject(
+            loader, "./Assets/Universe/Universe.obj", self.cNode, "SpaceBaseB"
+        )
+        self.baseModelB.modelNode.setPos((0.75, 0, 0))
+        self.cNode.setPos(pos)
+        self.cNode.setScale(1.5)
 
-        self.modelNode.setPos(pos)
-        self.modelNode.setScale(1.5)
         self.defenders: list[SpaceJamDefender] = []
-        self.spawnDefenders(loader, self.modelNode, 100, 0, (1, 0, 0, 1))
-        self.spawnDefenders(loader, self.modelNode, 100, 1, (0, 1, 0, 1))
+        self.spawnDefenders(loader, self.cNode, 100, 0, (1, 0, 0, 1))
+        self.spawnDefenders(loader, self.cNode, 100, 1, (0, 1, 0, 1))
+        # print("Space Jam Base placed at " + str(pos))
 
     def spawnDefenders(
         self,
@@ -108,25 +119,39 @@ class SpaceJamBase(CollisionBaseClasses.SphereCollidableObject):
             def_positions = SpaceJamFunctions.CreateLineOfLinePatternsPositionsList(
                 count, count, Vec3(0, 0, 0), Vec3(-1, 0, 1), Vec3(1, -1, -1)
             )
-
         for pos in def_positions:
+            # print("Spawned defender in pattern " + str(pattern) + " at pos " + str(pos))
             self.defenders.append(
-                SpaceJamDefender(loader, parent_node, pos, color_tint)
+                SpaceJamDefender(
+                    loader,
+                    parent_node,
+                    pos,
+                    color_tint,
+                    parent_node.name + "def" + str(len(self.defenders)),
+                )
             )
 
 
-class SpaceJamDefender(CollisionBaseClasses.SphereCollidableObject):
+class SpaceJamDefender(
+    BaseClasses.ModelObject  # , CollisionBaseClasses.SphereCollidableObject
+):
     """SphereCollidableObject spawned and managed by a Base"""
 
     def __init__(
-        self, loader: Loader, parent_node: NodePath, pos: Vec3, col_tint: LColor
+        self, loader, parent_node: NodePath, pos: Vec3, col_tint: LColor, node_name: str
     ):
-        super(SpaceJamDefender, self).__init__(
+        BaseClasses.ModelObject.__init__(
+            self,
             loader,
             "./Assets/Planets/protoPlanet.obj",
             parent_node,
-            "SpaceBaseDefender",
+            node_name + "Model",
         )
+        # CollisionBaseClasses.SphereCollidableObject.__init__(
+        #    self, self.modelNode, node_name + "Collider"
+        # )
+
         self.modelNode.setScale(0.5)
         self.modelNode.setPos(pos)
         self.modelNode.setColorScale(col_tint)
+        # print("Spawned Defender(" + node_name + ")")

@@ -5,7 +5,7 @@ from pandac.PandaModules import Vec3
 from direct.task.Task import TaskManager
 
 
-class SpaceJamPlayerShip(BaseClasses.ObjectWithModel):
+class SpaceJamPlayerShip(BaseClasses.ModelObject):
     """The all-important class managing the Player object. The interface between the human player and the game! Controls the player ship and camera and maps the input."""
 
     def __init__(
@@ -161,6 +161,7 @@ class SpaceJamPlayerShip(BaseClasses.ObjectWithModel):
     def addShipThrust(self, task: Task):
         """Makes the ship go a little bit forward. No acceleration or velocity (yet), just directly dragging it through space."""
         self.shipObj.setPos(self.shipObj.getPos() + self.getShipForward())
+        # print("Player at " + str(self.shipObj.getPos()))
         return task.cont
 
     # CAMERA TASK
