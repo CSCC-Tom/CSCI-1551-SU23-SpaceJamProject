@@ -12,7 +12,9 @@ class SpaceJamUniverse(BaseClasses.ModelObject, CollisionBaseClasses.SphereColli
         BaseClasses.ModelObject.__init__(
             self, loader, "./Assets/Universe/Universe.obj", scene_node, "Universe"
         )
-        CollisionBaseClasses.SphereCollider.__init__(self, self.modelNode, "Universe")
+        CollisionBaseClasses.SphereCollider.__init__(
+            self, self.modelNode, "Universe", True
+        )
         self.modelNode.setScale(90000)
 
 
@@ -132,10 +134,8 @@ class SpaceJamBase(CollisionBaseClasses.CapsuleCollider):
             )
 
 
-class SpaceJamDefender(
-    BaseClasses.ModelObject  # , CollisionBaseClasses.SphereCollidableObject
-):
-    """SphereCollidableObject spawned and managed by a Base"""
+class SpaceJamDefender(BaseClasses.ModelObject, CollisionBaseClasses.SphereCollider):
+    """Object spawned and managed by a Base that has a model and collider"""
 
     def __init__(
         self, loader, parent_node: NodePath, pos: Vec3, col_tint: LColor, node_name: str
@@ -147,9 +147,9 @@ class SpaceJamDefender(
             parent_node,
             node_name + "Model",
         )
-        # CollisionBaseClasses.SphereCollidableObject.__init__(
-        #    self, self.modelNode, node_name + "Collider"
-        # )
+        CollisionBaseClasses.SphereCollider.__init__(
+            self, self.modelNode, node_name + "Collider"
+        )
 
         self.modelNode.setScale(0.5)
         self.modelNode.setPos(pos)

@@ -1,8 +1,11 @@
-from panda3d.core import PandaNode, Loader, NodePath
+from panda3d.core import Loader, NodePath
 from Classes import BaseClasses, CollisionBaseClasses
 from direct.task import Task
 from pandac.PandaModules import Vec3
 from direct.task.Task import TaskManager
+
+DEFAULT_PLAYER_ROTATION_RATE = 2
+DEFAULT_PLAYER_THRUST_RATE = 1
 
 
 class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCollider):
@@ -20,7 +23,6 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
         )
         CollisionBaseClasses.SphereCollider.__init__(self, self.modelNode, "Player")
 
-        self.modelNode.setScale(0.3)
         self.replaceTextureOnModel(
             loader, "./Assets/Planets/angryPlanet.jpg", (0.95, 0.7, 0.8, 1.0)
         )
@@ -32,8 +34,8 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
         self.taskMgr.add(self.updatePlayerCameraTask, "UpdateCameraTask")
 
         # Can play with these values to change how it feels to fly
-        self.rotationRate = 2
-        self.thrustRate = 1
+        self.rotationRate = DEFAULT_PLAYER_ROTATION_RATE
+        self.thrustRate = DEFAULT_PLAYER_THRUST_RATE
 
         # empty-object target to help the ship stay oriented in desired rotations without fancy Euler logic
         self.lookTarget = NodePath("Player Look Target")
@@ -82,17 +84,17 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
         else:
             self.taskMgr.remove("rotateShipPitchCCW")
 
-    def rollCWKeyEvent(self, keydown: int):
-        if keydown:
-            self.taskMgr.add(self.rotateShipRollCW, "rotateShipRollCW")
-        else:
-            self.taskMgr.remove("rotateShipRollCW")
-
     def rollCCWKeyEvent(self, keydown: int):
         if keydown:
             self.taskMgr.add(self.rotateShipRollCCW, "rotateShipRollCCW")
         else:
             self.taskMgr.remove("rotateShipRollCCW")
+
+    def rollCWKeyEvent(self, keydown: int):
+        if keydown:
+            self.taskMgr.add(self.rotateShipRollCW, "rotateShipRollCW")
+        else:
+            self.taskMgr.remove("rotateShipRollCW")
 
     def thrustKeyEvent(self, keydown: int):
         if keydown:
@@ -106,43 +108,49 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
     # The advantage of this over get/setH/P/R is that the raw HPR functions are based on absolute world space, and the math is kind of hard.
     # Physically moving an invisible object and looking at it, requires less math for the programmer than doing fancy quaternion-based operations.
     # You are free to implement your rotations in whatever way you prefer, as long as they're reasonable.
+
+    def adjustShipLookTarget(self, up_amount: float, right_amount: float):
+        """Helper function to adjust the ship's look target. Uses rotationRate; use -1.0 to 1.0 to set up_ and right_amount between a full down/left and a full up/right turn"""
+        self.lookTarget.setPos(
+            self.getShipPos()
+            + (self.getShipForward() * 50)
+            + (self.getShipUp() * up_amount * self.rotationRate)
+            + (self.getShipRight() * right_amount * self.rotationRate)
+        )
+
+    def lookAtShipTarget(self):
+        """Helper function to look at the ship's look target while maintaining current ship up direction"""
+        self.modelNode.lookAt(self.lookTarget.getPos(), self.getShipUp())
+
     def rotateShipHeadingCW(self, task: Task):
         """Makes ship rotate heading clockwise, or to the right."""
-        self.lookTarget.setPos(
-            self.getShipPos() + (self.getShipForward() * 50) + self.getShipRight()
-        )
-        self.modelNode.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        self.adjustShipLookTarget(0, 1)
+        self.lookAtShipTarget()
         # print("Rotate CW -- Curr Heading = " + str(self.modelNode.getH()))
         return task.cont
 
     def rotateShipHeadingCCW(self, task: Task):
         """Makes ship rotate heading counter-clockwise, or to the left."""
-        self.lookTarget.setPos(
-            self.getShipPos() + (self.getShipForward() * 50) - self.getShipRight()
-        )
-        self.modelNode.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        self.adjustShipLookTarget(0, -1)
+        self.lookAtShipTarget()
         # print("Rotate CCW -- Curr Heading = " + str(self.modelNode.getH()))
         return task.cont
 
     def rotateShipPitchCW(self, task: Task):
         """Makes ship rotate pitch clockwise, or upwards."""
-        self.lookTarget.setPos(
-            self.getShipPos() + (self.getShipForward() * 50) + self.getShipUp()
-        )
-        self.modelNode.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        self.adjustShipLookTarget(1, 0)
+        self.lookAtShipTarget()
         # print("Rotate CW -- Curr Pitch = " + str(self.modelNode.getP()))
         return task.cont
 
     def rotateShipPitchCCW(self, task: Task):
         """Makes ship rotate pitch counter-clockwise, or downwards."""
-        self.lookTarget.setPos(
-            self.getShipPos() + (self.getShipForward() * 50) - self.getShipUp()
-        )
-        self.modelNode.lookAt(self.lookTarget.getPos(), self.getShipUp())
+        self.adjustShipLookTarget(-1, 0)
+        self.lookAtShipTarget()
         # print("Rotate CW -- Curr Pitch = " + str(self.modelNode.getP()))
         return task.cont
 
-    def rotateShipRollCW(self, task: Task):
+    def rotateShipRollCCW(self, task: Task):
         """Makes ship rotate roll clockwise."""
         # Note that since the lookTarget is always directly ahead of the player, there is no need to touch it.
         curr_r = self.modelNode.getR() % 360
@@ -150,7 +158,7 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
         self.modelNode.setR(curr_r - self.rotationRate)
         return task.cont
 
-    def rotateShipRollCCW(self, task: Task):
+    def rotateShipRollCW(self, task: Task):
         """Makes ship rotate roll counter-clockwise."""
         # Note that since the lookTarget is always directly ahead of the player, there is no need to touch it.
         curr_r = self.modelNode.getR() % 360
@@ -160,7 +168,9 @@ class SpaceJamPlayerShip(BaseClasses.ModelObject, CollisionBaseClasses.SphereCol
 
     def addShipThrust(self, task: Task):
         """Makes the ship go a little bit forward. No acceleration or velocity (yet), just directly dragging it through space."""
-        self.modelNode.setPos(self.modelNode.getPos() + self.getShipForward())
+        self.modelNode.setPos(
+            self.modelNode.getPos() + (self.getShipForward() * self.thrustRate)
+        )
         # print("Player at " + str(self.modelNode.getPos()))
         return task.cont
 

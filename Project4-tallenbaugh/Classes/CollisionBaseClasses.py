@@ -14,7 +14,7 @@ class GenericCollider(PandaNode):
     """ObjectWithModel with a CollisionNode called cNode"""
 
     def __init__(self, node_name: str, parent_node: NodePath):
-        super(GenericCollider, self).__init__(node_name + "Collider")
+        PandaNode.__init__(self, node_name + "Collider")
         self.cNode = parent_node.attachNewNode(CollisionNode(node_name + "_cNode"))
         self.cNode.show()
 
@@ -26,14 +26,21 @@ class SphereCollider(GenericCollider):
         self,
         parent_node: NodePath,
         node_name: str,
+        inverted: bool = False,
         sphere_pos: Vec3 = (0, 0, 0),
         sphere_radius: float = 1.0,
     ):
-        super(SphereCollider, self).__init__(
+        GenericCollider.__init__(
+            self,
             node_name + "Sphere",
             parent_node,
         )
-        self.cNode.node().addSolid(CollisionSphere(sphere_pos, sphere_radius))
+        shape = (
+            CollisionSphere(sphere_pos, sphere_radius)
+            if not inverted
+            else CollisionInvSphere(sphere_pos, sphere_radius)
+        )
+        self.cNode.node().addSolid(shape)
 
 
 class CapsuleCollider(GenericCollider):
