@@ -68,7 +68,7 @@ class SpaceJam(ShowBase):
             self.loader, self.render, self.taskMgr, self.camera
         )
         # Moves the ship somewhere reasonable outside of the Sun
-        self.player.shipObj.setPos((50, 60, 30))
+        self.player.modelNode.setPos((50, 60, 30))
         self.assignPlayerKeyBindings(self.player)
 
 
