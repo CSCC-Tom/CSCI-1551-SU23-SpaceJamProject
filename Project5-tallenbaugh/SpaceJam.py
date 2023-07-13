@@ -3,6 +3,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.gui.DirectGui import *
 from pandac.PandaModules import TextNode, CollisionHandlerPusher, CollisionTraverser
 from Classes import SpaceJamClasses, SpaceJamPlayer
+from Classes.Player import ShipMovement
 
 
 def quit():
@@ -73,8 +74,8 @@ class SpaceJam(ShowBase):
         """Function to make the player go very very fast to test the edge of the universe, or to return speed to normal."""
 
         self.superSpeedActive = not self.superSpeedActive
-        self.player.thrustRate = (
-            SpaceJamPlayer.DEFAULT_PLAYER_THRUST_RATE
+        self.player.movement.thrustRate = (
+            ShipMovement.DEFAULT_PLAYER_THRUST_RATE
             if not self.superSpeedActive
             else 9000
         )
@@ -82,7 +83,7 @@ class SpaceJam(ShowBase):
             "[s] -> superspeed("
             + str(self.superSpeedActive)
             + ", "
-            + str(self.player.thrustRate)
+            + str(self.player.movement.thrustRate)
             + ")"
         )
 
@@ -97,31 +98,8 @@ class SpaceJam(ShowBase):
         self.accept("escape", quit)
         self.addOnscreenCoreKeyBindings()
 
-    def assignPlayerKeyBindings(self):
-        if not isinstance(self.player, SpaceJamPlayer.SpaceJamPlayerShip):
-            raise AssertionError(
-                "Space Jam called assignPlayerKeyBindings() but did not have a self.player!"
-            )
-        """Key bindings between the hardware and the player functions; arrow keys for Heading and Pitch, a/d for Roll, space for Thrust"""
-        self.accept("arrow_right", self.player.headingCWKeyEvent, [1])
-        self.accept("arrow_right-up", self.player.headingCWKeyEvent, [0])
-        self.accept("arrow_left", self.player.headingCCWKeyEvent, [1])
-        self.accept("arrow_left-up", self.player.headingCCWKeyEvent, [0])
-        self.accept("arrow_up", self.player.pitchCWKeyEvent, [1])
-        self.accept("arrow_up-up", self.player.pitchCWKeyEvent, [0])
-        self.accept("arrow_down", self.player.pitchCCWKeyEvent, [1])
-        self.accept("arrow_down-up", self.player.pitchCCWKeyEvent, [0])
-        self.accept("a", self.player.rollCCWKeyEvent, [1])
-        self.accept("a-up", self.player.rollCCWKeyEvent, [0])
-        self.accept("d", self.player.rollCWKeyEvent, [1])
-        self.accept("d-up", self.player.rollCWKeyEvent, [0])
-        self.accept("space", self.player.thrustKeyEvent, [1])
-        self.accept("space-up", self.player.thrustKeyEvent, [0])
-        self.accept("f", self.player.fireMissileIfReady)
-        self.addOnscreenPlayerKeyBindings()
-
     def preparePlayerTraverser(self):
-        if not isinstance(self.player, SpaceJamPlayer.SpaceJamPlayerShip):
+        if not isinstance(self.player, SpaceJamPlayer.PlayerController):
             raise AssertionError(
                 "Space Jam called preparePlayerTraverser() but did not have a self.player!"
             )
@@ -150,13 +128,13 @@ class SpaceJam(ShowBase):
         if self.camera == None:
             raise AssertionError("Game did not have a valid camera!")
 
-        self.player = SpaceJamPlayer.SpaceJamPlayerShip(
-            self.loader, self.render, self.taskMgr, self.camera
+        self.player = SpaceJamPlayer.PlayerController(
+            self.loader, self.render, self.taskMgr, self.camera, self.accept
         )
 
         # Moves the ship somewhere reasonable outside of the Sun
         self.player.modelNode.setPos((50, 60, 30))
-        self.assignPlayerKeyBindings()
+        self.addOnscreenPlayerKeyBindings()
         self.preparePlayerTraverser()
 
         # Debug tools

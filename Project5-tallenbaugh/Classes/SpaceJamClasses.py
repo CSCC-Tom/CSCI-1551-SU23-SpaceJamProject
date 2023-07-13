@@ -1,4 +1,4 @@
-from panda3d.core import PandaNode, Loader, NodePath, Vec3, LColor
+from panda3d.core import PandaNode, NodePath, Vec3, LColor
 from Classes import SpaceJamFunctions, BaseClasses, CollisionBaseClasses
 
 # Script containing primarily "end leaf" classes for SpaceJam that are not inherited by anything, and are generally small.
@@ -8,7 +8,7 @@ from Classes import SpaceJamFunctions, BaseClasses, CollisionBaseClasses
 class SpaceJamUniverse(BaseClasses.ModelObject, CollisionBaseClasses.SphereCollider):
     """ObjectWithModel representing the Universe (skybox)"""
 
-    def __init__(self, loader: Loader, scene_node: NodePath):
+    def __init__(self, loader, scene_node: NodePath):
         BaseClasses.ModelObject.__init__(
             self, loader, "./Assets/Universe/Universe.obj", scene_node, "Universe"
         )
@@ -44,7 +44,7 @@ class SpaceJamPlanet(BaseClasses.ModelObject, CollisionBaseClasses.SphereCollide
 class SpaceJamSolarSystem(PandaNode):
     """PandaNode container of all the Planets in the Universe. Currently contains Sun, Mercury, and BBQ"""
 
-    def __init__(self, loader: Loader, parent_node: NodePath):
+    def __init__(self, loader, parent_node: NodePath):
         super(SpaceJamSolarSystem, self).__init__("Solar System")
 
         self.sun = SpaceJamPlanet(
@@ -82,7 +82,7 @@ class SpaceJamSolarSystem(PandaNode):
 class SpaceJamBase(CollisionBaseClasses.CapsuleCollider):
     """SphereCollidableObject that also manages a swarm of Defenders"""
 
-    def __init__(self, loader: Loader, parent_node: NodePath, pos: Vec3):
+    def __init__(self, loader, parent_node: NodePath, pos: Vec3):
         super(SpaceJamBase, self).__init__(
             parent_node,
             "SpaceBaseA",
@@ -106,7 +106,7 @@ class SpaceJamBase(CollisionBaseClasses.CapsuleCollider):
 
     def spawnDefenders(
         self,
-        loader: Loader,
+        loader,
         parent_node: NodePath,
         count: int,
         pattern: int,
