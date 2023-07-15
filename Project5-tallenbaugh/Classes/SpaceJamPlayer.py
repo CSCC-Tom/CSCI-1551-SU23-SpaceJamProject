@@ -1,4 +1,4 @@
-from panda3d.core import NodePath
+from panda3d.core import Loader, NodePath
 from Classes.BaseClasses import ModelObject
 from Classes.CollisionBaseClasses import SphereCollider
 from Classes.Player.ShipWeapon import ShipCannon
@@ -15,7 +15,7 @@ class PlayerController(ModelObject, SphereCollider):
 
     def __init__(
         self,
-        loader,
+        loader: Loader,
         scene_node: NodePath,
         taskMgr: TaskManager,
         camera: NodePath,

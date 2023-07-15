@@ -1,4 +1,4 @@
-from panda3d.core import PandaNode, NodePath, Texture, Vec3, LColor
+from panda3d.core import Loader, PandaNode, NodePath, Texture, Vec3, LColor
 
 # Not to be confused with a "Base" that spawns defenders, this script provides the superclass(es) that all other game classes inherit from.
 
@@ -6,13 +6,15 @@ from panda3d.core import PandaNode, NodePath, Texture, Vec3, LColor
 class ModelObject(PandaNode):
     """PandaNode object with a primary NodePath called modelNode, that also offers functions to load and modify the model."""
 
-    def __init__(self, loader, model_path: str, parent_node: NodePath, node_name: str):
+    def __init__(
+        self, loader: Loader, model_path: str, parent_node: NodePath, node_name: str
+    ):
         self.modelNode = self.loadAndAddModelNodePath(loader, parent_node, model_path)
         self.modelNode.setName(node_name)
 
     def loadAndAddModelNodePath(
         self,
-        loader,
+        loader: Loader,
         parent: NodePath,
         model_asset_path: str,
         scale: float = 1.0,
@@ -37,7 +39,7 @@ class ModelObject(PandaNode):
         return self.modelNode
 
     def replaceTextureOnModel(
-        self, loader, texture_path: str, col: LColor = (1.0, 1.0, 1.0, 1.0)
+        self, loader: Loader, texture_path: str, col: LColor = (1.0, 1.0, 1.0, 1.0)
     ):
         """Shared function to swap the texture of the modelNode of a ObjectWithModel if desired"""
         texture: Texture = loader.loadTexture(texture_path)

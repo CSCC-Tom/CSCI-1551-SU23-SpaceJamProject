@@ -4,6 +4,7 @@ from direct.gui.DirectGui import *
 from pandac.PandaModules import TextNode, CollisionHandlerPusher, CollisionTraverser
 from Classes import SpaceJamClasses, SpaceJamPlayer
 from Classes.Player import ShipMovement
+from Classes.Debug.SpaceJamDebug import DebugActions
 
 
 def quit():
@@ -37,17 +38,6 @@ class SpaceJam(ShowBase):
             scale=0.07,
         )
 
-    def addOnscreenDebugKeyBindings(self):
-        """Function to put title on the screen."""
-        self.debugKeyInstructions = OnscreenText(
-            text="[s] -> superspeed(False, 1)",
-            style=1,
-            fg=(1, 1, 1, 1),
-            pos=(1.3, 0.925),
-            align=TextNode.ARight,
-            scale=0.07,
-        )
-
     def addOnscreenPlayerKeyBindings(self):
         """Function to put title on the screen."""
 
@@ -69,29 +59,6 @@ class SpaceJam(ShowBase):
             align=TextNode.ALeft,
             scale=0.07,
         )
-
-    def toggleDebugSuperSpeed(self):
-        """Function to make the player go very very fast to test the edge of the universe, or to return speed to normal."""
-
-        self.superSpeedActive = not self.superSpeedActive
-        self.player.movement.thrustRate = (
-            ShipMovement.DEFAULT_PLAYER_THRUST_RATE
-            if not self.superSpeedActive
-            else 9000
-        )
-        self.debugKeyInstructions.text = (
-            "[s] -> superspeed("
-            + str(self.superSpeedActive)
-            + ", "
-            + str(self.player.movement.thrustRate)
-            + ")"
-        )
-
-    def assignDebugKeyBindings(self):
-        """Key bindings that involve the developer debugging the game. Should not be used in a released version. Currently maps the s key to the Super Speed function."""
-
-        self.accept("s", self.toggleDebugSuperSpeed)
-        self.addOnscreenDebugKeyBindings()
 
     def assignCoreKeyBindings(self):
         """Key bindings that involve very core game functions. Currently maps the escape key to the Quit function."""
@@ -138,8 +105,7 @@ class SpaceJam(ShowBase):
         self.preparePlayerTraverser()
 
         # Debug tools
-        self.superSpeedActive = False
-        self.assignDebugKeyBindings()
+        self.debugActions = DebugActions(self.accept, self.player.movement)
 
 
 app = SpaceJam()

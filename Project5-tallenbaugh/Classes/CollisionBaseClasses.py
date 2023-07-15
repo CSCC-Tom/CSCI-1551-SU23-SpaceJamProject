@@ -7,7 +7,6 @@ from panda3d.core import (
     CollisionInvSphere,
     Vec3,
 )
-from Classes import BaseClasses
 
 
 class GenericCollider(PandaNode):
@@ -16,7 +15,7 @@ class GenericCollider(PandaNode):
     def __init__(self, node_name: str, parent_node: NodePath):
         PandaNode.__init__(self, node_name + "Collider")
         self.cNode = parent_node.attachNewNode(CollisionNode(node_name + "_cNode"))
-        self.cNode.show()
+        # self.cNode.show()
 
 
 class SphereCollider(GenericCollider):
