@@ -29,7 +29,7 @@ class ShipCannon:
 
     def __init__(
         self,
-        loader,
+        loader: Loader,
         scene_node: NodePath,
         ship_position_function: Callable[[], Vec3],
         ship_forward_function: Callable[[], Vec3],
