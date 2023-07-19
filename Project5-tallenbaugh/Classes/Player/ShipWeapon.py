@@ -46,3 +46,6 @@ class ShipCannon:
         if init == False:
             self.activeMissile.concludeFlight()
         self.activeMissile = None
+
+    def onMissileFinishedFlight(self):
+        self.reload()

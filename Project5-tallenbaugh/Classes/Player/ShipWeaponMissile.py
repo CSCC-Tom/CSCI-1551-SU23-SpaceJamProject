@@ -13,4 +13,4 @@ class PhaserMissile(ProjectileObject):
         ProjectileObject.__init__(
             self, loader, "./Assets/Phaser/phaser.egg", scene_node, "PlayerPhaser"
         )
-        self.modelNode.setScale(0.1)
+        self.modelColliderNode.modelNode.setScale(0.1)
