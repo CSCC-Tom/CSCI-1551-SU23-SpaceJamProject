@@ -15,11 +15,13 @@ class ShipCannon:
         ship_forward_function: Callable[[], Vec3],
     ):
         # Start the phaser in "active" so we can call reload to prep it.
-        self.activeMissile = PhaserMissile(loader, scene_node)
+        self.activeMissile = PhaserMissile(
+            loader, scene_node, self.onMissileHitNoTargets
+        )
         self.reloadedMissile = None
         self.getFirePos = ship_position_function
         self.getFireDir = ship_forward_function
-        self.reload(True)
+        self.reload()
 
     def fireMissileIfReady(self):
         """If the missile is in the reloadedMissile slot, then we kick it off as an active missile"""
@@ -36,16 +38,19 @@ class ShipCannon:
         # Fire!
         self.activeMissile.commenceFlight()
 
-    def reload(self, init=False):
+    def reload(self):
         """Function that takes the active missile and makes it readied again."""
         if self.reloadedMissile != None:
             # There is already a reloaded missile. Something else should call fireMissileIfReady() first.
             return
 
         self.reloadedMissile = self.activeMissile
-        if init == False:
-            self.activeMissile.concludeFlight()
         self.activeMissile = None
 
-    def onMissileFinishedFlight(self):
+    def onMissileHitNoTargets(self, missile: PhaserMissile):
+        if self.activeMissile is not missile:
+            raise AssertionError(
+                "ShipCannon.onMissileHitNoTargets called, but the missile was not the active expected missile..."
+            )
+
         self.reload()

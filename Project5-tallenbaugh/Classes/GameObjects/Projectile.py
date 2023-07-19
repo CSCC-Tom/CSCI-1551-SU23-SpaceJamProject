@@ -3,6 +3,7 @@ from pandac.PandaModules import Vec3
 from direct.showbase.DirectObject import DirectObject
 from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
 from direct.interval.LerpInterval import LerpPosInterval
+from typing import Callable
 
 
 class ProjectileObject(DirectObject):
@@ -18,11 +19,13 @@ class ProjectileObject(DirectObject):
         model_path: str,
         parent_node: NodePath,
         node_name: str,
+        flight_concluded_callback: Callable[[], None],
     ):
         DirectObject.__init__(self)
         self.modelColliderNode = ModelWithSphereCollider(
             loader, model_path, parent_node, node_name
         )
+        self.flightConcludedCallback = flight_concluded_callback
 
     def prepareFlight(
         self, flightStartPos: Vec3, flightDir: Vec3, flightDistance: float
@@ -61,3 +64,5 @@ class ProjectileObject(DirectObject):
         self.flightMovementInterval = {}
         # Stick the "concluded" projectile somewhere far away so we don't see it.
         self.modelColliderNode.modelNode.setPos((9000, 9000, 9000))
+        # Call back up to whatever needs to know about the flight being over
+        self.flightConcludedCallback()
