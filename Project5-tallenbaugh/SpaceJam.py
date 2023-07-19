@@ -1,7 +1,7 @@
 import sys
 from direct.showbase.ShowBase import ShowBase
 from direct.gui.DirectGui import *
-from pandac.PandaModules import TextNode, CollisionHandlerPusher, CollisionTraverser
+from pandac.PandaModules import TextNode, CollisionTraverser
 from Classes import SpaceJamPlayer
 from Classes.Environment.Universe import SpaceJamUniverse
 from Classes.Environment.SolarSystem import SpaceJamSolarSystem
@@ -72,12 +72,12 @@ class SpaceJam(ShowBase):
             raise AssertionError(
                 "Space Jam called preparePlayerTraverser() but did not have a self.player!"
             )
-        self.pusher = CollisionHandlerPusher()
-        self.pusher.addCollider(self.player.cNode, self.player.modelNode)
         self.cTrav = CollisionTraverser()
         self.cTrav.traverse(self.render)
-        self.cTrav.addCollider(self.player.cNode, self.pusher)
+        self.cTrav.addCollider(self.player.cNode, self.player.pusher)
         self.cTrav.showCollisions(self.render)
+
+    # def trackCollisionsFor
 
     def __init__(self):
         ShowBase.__init__(self)

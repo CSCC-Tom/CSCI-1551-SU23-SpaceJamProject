@@ -1,10 +1,12 @@
 from panda3d.core import Loader, NodePath
 from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
 from Classes.Player.ShipWeapon import ShipCannon
+from Classes.Player.ShipWeaponMissile import PhaserMissile
 from Classes.Player.ShipMovement import ShipMovement
 from Classes.Player.PlayerInput import PlayerInput
+from Classes.Enemy.EnemyDrone import EnemyBaseDrone
 from direct.task import Task
-from pandac.PandaModules import Vec3
+from pandac.PandaModules import Vec3, CollisionHandlerPusher
 from direct.task.Task import TaskManager
 from typing import Callable
 
@@ -54,6 +56,9 @@ class PlayerController(ModelWithSphereCollider):
         # Add the updateCameraTask procedure to the task manager.
         self.taskMgr.add(self.updatePlayerCameraTask, "UpdateCameraTask")
 
+        self.pusher = CollisionHandlerPusher()
+        self.pusher.addCollider(self.cNode, self.modelNode)
+
     # CONVENIENCE FUNCTIONS to make other functions more concise and self-describing.
     def getShipPos(self):
         """Convenience to get current ship position in space."""
@@ -92,3 +97,8 @@ class PlayerController(ModelWithSphereCollider):
         # Make the camera match the ship's rotation exactly. (Could use headsUp or lookAt similarly, if you want the camera to look at the player rather than look where the player is looking.)
         self.camera.setHpr(self.modelNode.getHpr())
         return task.cont
+
+    def onPlayerMissileHitEnemyDrone(
+        self, missile: PhaserMissile, target_drone: EnemyBaseDrone
+    ):
+        print("A " + missile.modelColliderNode.name + " hit a " + target_drone.name)
