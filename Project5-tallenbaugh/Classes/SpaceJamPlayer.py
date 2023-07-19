@@ -22,7 +22,7 @@ class PlayerController(ModelWithSphereCollider):
         camera: NodePath,
         input_accept: Callable[[str, Callable, []], None],
         start_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
-        stop_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
+        stop_handling_collisions_cb: Callable[[NodePath], None],
     ):
         ModelWithSphereCollider.__init__(
             self, loader, "./Assets/TheBorg/theBorg.egg", scene_node, "Player"

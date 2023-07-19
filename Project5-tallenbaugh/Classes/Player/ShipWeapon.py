@@ -1,6 +1,6 @@
 from panda3d.core import Loader, NodePath
 from Classes.Player.ShipWeaponMissile import PhaserMissile
-from pandac.PandaModules import Vec3, CollisionHandler
+from pandac.PandaModules import Vec3, CollisionHandler, CollisionNode
 from typing import Callable
 
 
@@ -14,13 +14,14 @@ class ShipCannon:
         ship_position_function: Callable[[], Vec3],
         ship_forward_function: Callable[[], Vec3],
         start_tracking_missile_cb: Callable[[NodePath, CollisionHandler], None],
-        stop_tracking_missile_cb: Callable[[NodePath, CollisionHandler], None],
+        stop_tracking_missile_cb: Callable[[NodePath], None],
     ):
         # Start the phaser in "active" so we can call reload to prep it.
         self.activeMissile = PhaserMissile(
             loader,
             scene_node,
             self.onMissileHitNoTargets,
+            self.onMissileHitSomeTarget,
             start_tracking_missile_cb,
             stop_tracking_missile_cb,
         )
@@ -58,6 +59,16 @@ class ShipCannon:
         if self.activeMissile is not missile:
             raise AssertionError(
                 "ShipCannon.onMissileHitNoTargets called, but the missile was not the active expected missile..."
+            )
+
+        self.reload()
+
+    def onMissileHitSomeTarget(self, missile: PhaserMissile, target: CollisionNode):
+        if self.activeMissile is not missile:
+            raise AssertionError(
+                "ShipCannon.onMissileHitSomeTarget hit "
+                + target.name
+                + ", but the missile was not the active expected missile..."
             )
 
         self.reload()

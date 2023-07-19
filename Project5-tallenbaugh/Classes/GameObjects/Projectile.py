@@ -51,18 +51,21 @@ class ProjectileObject(DirectObject):
             raise AssertionError(
                 "ProjectileObject.commenceFlight called, but did not call prepareFlight first! Nothing happened."
             )
-        self.acceptOnce("Flight Concluded", self.concludeFlight)
+        self.acceptOnce("Flight Concluded", self.concludeFlight, [False])
         self.flightMovementInterval.setDoneEvent("Flight Concluded")
         self.flightMovementInterval.start()
         self.commenced = True
 
-    def concludeFlight(self):
+    def concludeFlight(self, interrupted: bool):
         if not self.commenced:
             raise AssertionError(
                 "ProjectileObject.concludeFlight called, but did not call commenceFlight first! Nothing happened."
             )
+        self.flightMovementInterval.setDoneEvent("")
+        self.flightMovementInterval.pause()
         self.flightMovementInterval = {}
         # Stick the "concluded" projectile somewhere far away so we don't see it.
         self.modelColliderNode.modelNode.setPos((9000, 9000, 9000))
         # Call back up to whatever needs to know about the flight being over
-        self.flightConcludedCallback()
+        if interrupted == False:
+            self.flightConcludedCallback()

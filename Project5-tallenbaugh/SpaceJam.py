@@ -79,14 +79,12 @@ class SpaceJam(ShowBase):
         self.cTrav.showCollisions(self.render)
 
     def startTrackingCollisionsForHandler(
-        self, object_node: NodePath, collision_handler: CollisionHandler
+        self, collider_node: NodePath, collision_handler: CollisionHandler
     ):
-        self.cTrav.addCollider(object_node, collision_handler)
+        self.cTrav.addCollider(collider_node, collision_handler)
 
-    def stopTrackingCollisionsForHandler(
-        self, object_node: NodePath, collision_handler: CollisionHandler
-    ):
-        self.cTrav.removeCollider(object_node, collision_handler)
+    def stopTrackingCollisionsForHandler(self, collider_node: NodePath):
+        self.cTrav.removeCollider(collider_node)
 
     def __init__(self):
         ShowBase.__init__(self)
