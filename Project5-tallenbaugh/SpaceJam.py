@@ -2,7 +2,10 @@ import sys
 from direct.showbase.ShowBase import ShowBase
 from direct.gui.DirectGui import *
 from pandac.PandaModules import TextNode, CollisionHandlerPusher, CollisionTraverser
-from Classes import SpaceJamClasses, SpaceJamPlayer
+from Classes import SpaceJamPlayer
+from Classes.Environment.Universe import SpaceJamUniverse
+from Classes.Environment.SolarSystem import SpaceJamSolarSystem
+from Classes.Enemy.EnemyBase import SpaceJamEnemyBase
 from Classes.Debug.SpaceJamDebug import DebugActions
 
 
@@ -83,9 +86,9 @@ class SpaceJam(ShowBase):
 
         self.assignCoreKeyBindings()
 
-        self.universe = SpaceJamClasses.SpaceJamUniverse(self.loader, self.render)
-        self.planets = SpaceJamClasses.SpaceJamSolarSystem(self.loader, self.render)
-        self.baseA = SpaceJamClasses.SpaceJamBase(
+        self.universe = SpaceJamUniverse(self.loader, self.render)
+        self.planets = SpaceJamSolarSystem(self.loader, self.render)
+        self.baseA = SpaceJamEnemyBase(
             self.loader,
             self.render,
             self.planets.mercury.modelNode.getPos() + (8, -8, -8),
