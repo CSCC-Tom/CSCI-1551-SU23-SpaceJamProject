@@ -6,7 +6,7 @@ from Classes.Player.ShipMovement import ShipMovement
 from Classes.Player.PlayerInput import PlayerInput
 from Classes.Enemy.EnemyDrone import EnemyBaseDrone
 from direct.task import Task
-from pandac.PandaModules import Vec3, CollisionHandlerPusher
+from pandac.PandaModules import Vec3, CollisionHandler, CollisionHandlerPusher
 from direct.task.Task import TaskManager
 from typing import Callable
 
@@ -20,7 +20,9 @@ class PlayerController(ModelWithSphereCollider):
         scene_node: NodePath,
         taskMgr: TaskManager,
         camera: NodePath,
-        inputAccept: Callable[[str, Callable, []], None],
+        input_accept: Callable[[str, Callable, []], None],
+        start_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
+        stop_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
     ):
         ModelWithSphereCollider.__init__(
             self, loader, "./Assets/TheBorg/theBorg.egg", scene_node, "Player"
@@ -37,10 +39,15 @@ class PlayerController(ModelWithSphereCollider):
         )
         # Phaser / Missile Weapon
         self.cannon = ShipCannon(
-            loader, scene_node, self.getShipPos, self.getShipForward
+            loader,
+            scene_node,
+            self.getShipPos,
+            self.getShipForward,
+            start_handling_collisions_cb,
+            stop_handling_collisions_cb,
         )
         # Set up our input, which requires both the movement and cannon module to work.
-        self.input = PlayerInput(inputAccept, self.movement, self.cannon, taskMgr)
+        self.input = PlayerInput(input_accept, self.movement, self.cannon, taskMgr)
 
         # Ship model is huge. Not ideal; scaling it down for now.
         self.modelNode.setScale(0.1)

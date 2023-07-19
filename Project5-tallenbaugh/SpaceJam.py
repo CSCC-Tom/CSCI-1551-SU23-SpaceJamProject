@@ -1,8 +1,9 @@
 import sys
 from direct.showbase.ShowBase import ShowBase
 from direct.gui.DirectGui import *
-from pandac.PandaModules import TextNode, CollisionTraverser
-from Classes import SpaceJamPlayer
+from panda3d.core import NodePath
+from pandac.PandaModules import TextNode, CollisionTraverser, CollisionHandler
+from Classes.SpaceJamPlayer import PlayerController
 from Classes.Environment.Universe import SpaceJamUniverse
 from Classes.Environment.SolarSystem import SpaceJamSolarSystem
 from Classes.Enemy.EnemyBase import SpaceJamEnemyBase
@@ -68,7 +69,7 @@ class SpaceJam(ShowBase):
         self.addOnscreenCoreKeyBindings()
 
     def preparePlayerTraverser(self):
-        if not isinstance(self.player, SpaceJamPlayer.PlayerController):
+        if not isinstance(self.player, PlayerController):
             raise AssertionError(
                 "Space Jam called preparePlayerTraverser() but did not have a self.player!"
             )
@@ -77,7 +78,15 @@ class SpaceJam(ShowBase):
         self.cTrav.addCollider(self.player.cNode, self.player.pusher)
         self.cTrav.showCollisions(self.render)
 
-    # def trackCollisionsFor
+    def startTrackingCollisionsForHandler(
+        self, object_node: NodePath, collision_handler: CollisionHandler
+    ):
+        self.cTrav.addCollider(object_node, collision_handler)
+
+    def stopTrackingCollisionsForHandler(
+        self, object_node: NodePath, collision_handler: CollisionHandler
+    ):
+        self.cTrav.removeCollider(object_node, collision_handler)
 
     def __init__(self):
         ShowBase.__init__(self)
@@ -97,8 +106,14 @@ class SpaceJam(ShowBase):
         if self.camera == None:
             raise AssertionError("Game did not have a valid camera!")
 
-        self.player = SpaceJamPlayer.PlayerController(
-            self.loader, self.render, self.taskMgr, self.camera, self.accept
+        self.player = PlayerController(
+            self.loader,
+            self.render,
+            self.taskMgr,
+            self.camera,
+            self.accept,
+            self.startTrackingCollisionsForHandler,
+            self.stopTrackingCollisionsForHandler,
         )
 
         # Moves the ship somewhere reasonable outside of the Sun

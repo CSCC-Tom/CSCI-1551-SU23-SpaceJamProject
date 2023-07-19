@@ -20,14 +20,12 @@ class ProjectileObject(DirectObject):
         parent_node: NodePath,
         node_name: str,
         flight_concluded_callback: Callable[[], None],
-        flight_interrupted_callback: Callable[[CollisionNode], None],
     ):
         DirectObject.__init__(self)
         self.modelColliderNode = ModelWithSphereCollider(
             loader, model_path, parent_node, node_name
         )
         self.flightConcludedCallback = flight_concluded_callback
-        self.flightInterruptedCallback = flight_interrupted_callback
 
     def prepareFlight(
         self, flightStartPos: Vec3, flightDir: Vec3, flightDistance: float
@@ -68,6 +66,3 @@ class ProjectileObject(DirectObject):
         self.modelColliderNode.modelNode.setPos((9000, 9000, 9000))
         # Call back up to whatever needs to know about the flight being over
         self.flightConcludedCallback()
-
-    def flightInterruptedByCollision(self, target_collider: CollisionNode):
-        print("PhaserMissile hit a " + target_collider.name)
