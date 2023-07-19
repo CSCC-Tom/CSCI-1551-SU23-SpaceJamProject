@@ -93,6 +93,8 @@ class SpaceJam(ShowBase):
 
         self.assignCoreKeyBindings()
 
+        self.enableParticles()
+
         self.universe = SpaceJamUniverse(self.loader, self.render)
         self.planets = SpaceJamSolarSystem(self.loader, self.render)
         self.baseA = SpaceJamEnemyBase(

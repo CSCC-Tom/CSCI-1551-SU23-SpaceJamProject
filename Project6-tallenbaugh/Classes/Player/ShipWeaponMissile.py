@@ -2,6 +2,7 @@ from panda3d.core import Loader, NodePath, CollisionNode
 from pandac.PandaModules import Vec3, CollisionHandler, CollisionEntry
 from Classes.GameObjects.ProjectileCollisionHandler import ProjectileCollisionHandler
 from typing import Callable
+from direct.particles.ParticleEffect import ParticleEffect
 
 
 class PhaserMissile(ProjectileCollisionHandler):
@@ -29,6 +30,7 @@ class PhaserMissile(ProjectileCollisionHandler):
             stop_handling_collisions_cb,
             ["%(player)ft-into-%(neutral)it", "%(player)ft-into-%(enemy)it"],
         )
+        self.sceneNodeParent = scene_node
         self.modelColliderNode.cNode.setTag("player", "player")
         self.phaserMissCallback = phaser_miss_callback
         self.phaserHitCallback = phaser_hit_callback
@@ -45,7 +47,10 @@ class PhaserMissile(ProjectileCollisionHandler):
             "player-into-drone",
             self.onProjectileHitEnemyDrone,
         )
-        print(self.modelColliderNode.cNode.name)
+        self.explosionEffect = ParticleEffect()
+        self.explosionEffect.loadConfig(
+            "/c/CSCC/CSCC-SU23-1551/SpaceJamRepo/Project6-tallenbaugh/Assets/Particles/RetroExplosion.ptf"
+        )
 
     def onProjectileHitNoTargets(self):
         # print("PhaserMissile hit no targets!")
@@ -60,8 +65,10 @@ class PhaserMissile(ProjectileCollisionHandler):
         print("ENEMY BASE: " + str(entry))
         self.flightInterruptedByCollision()
         self.phaserHitCallback(self, entry.getIntoNode())
+        self.explosionEffect.start(entry.getIntoNodePath(), self.sceneNodeParent)
 
     def onProjectileHitEnemyDrone(self, entry: CollisionEntry):
         print("ENEMY DRONE: " + str(entry))
         self.flightInterruptedByCollision()
         self.phaserHitCallback(self, entry.getIntoNode())
+        self.explosionEffect.start(entry.getIntoNodePath(), self.sceneNodeParent)
