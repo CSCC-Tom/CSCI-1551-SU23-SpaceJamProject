@@ -12,7 +12,7 @@ from panda3d.core import (
 class GenericCollider(PandaNode):
     """ObjectWithModel with a CollisionNode called cNode"""
 
-    def __init__(self, node_name: str, parent_node: NodePath):
+    def __init__(self, parent_node: NodePath, node_name: str):
         PandaNode.__init__(self, node_name + "Collider")
         self.cNode = parent_node.attachNewNode(CollisionNode(node_name + "_cNode"))
         # self.cNode.show()
@@ -31,8 +31,8 @@ class SphereCollider(GenericCollider):
     ):
         GenericCollider.__init__(
             self,
-            node_name + "Sphere",
             parent_node,
+            node_name + "Sphere",
         )
         shape = (
             CollisionSphere(sphere_pos, sphere_radius)
@@ -54,7 +54,7 @@ class CapsuleCollider(GenericCollider):
         sphere_radius: float = 1.0,
     ):
         super(CapsuleCollider, self).__init__(
-            node_name,
             parent_node,
+            node_name,
         )
         self.cNode.node().addSolid(CollisionCapsule(pos_a, pos_b, sphere_radius))

@@ -1,12 +1,12 @@
 from panda3d.core import Loader, NodePath
-from Classes import CollisionBaseClasses
+from Classes.GameObjects.GameCollider import SphereCollider
 from Classes.GameObjects.GameModel import ModelObject
 from pandac.PandaModules import Vec3
 from direct.interval.LerpInterval import LerpPosInterval
 from typing import Callable
 
 
-class PhaserMissile(ModelObject, CollisionBaseClasses.SphereCollider):
+class PhaserMissile(ModelObject, SphereCollider):
     """Missile/Phaser that belongs to the PlayerShip."""
 
     fireInterval: LerpPosInterval = {}
@@ -19,9 +19,7 @@ class PhaserMissile(ModelObject, CollisionBaseClasses.SphereCollider):
         ModelObject.__init__(
             self, loader, "./Assets/Phaser/phaser.egg", scene_node, "PlayerPhaser"
         )
-        CollisionBaseClasses.SphereCollider.__init__(
-            self, self.modelNode, "PlayerPhaser"
-        )
+        SphereCollider.__init__(self, self.modelNode, "PlayerPhaser")
         self.modelNode.setScale(0.1)
 
 

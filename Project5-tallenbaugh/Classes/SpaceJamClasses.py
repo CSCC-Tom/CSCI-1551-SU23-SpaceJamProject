@@ -1,20 +1,20 @@
 from panda3d.core import Loader, PandaNode, NodePath, Vec3, LColor
 from Classes import SpaceJamFunctions
 from Classes.GameObjects.GameModel import ModelObject
-from Classes.CollisionBaseClasses import SphereCollider, CapsuleCollider
+from Classes.GameObjects.GameCollider import SphereCollider, CapsuleCollider
+from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
 
 # Script containing primarily "end leaf" classes for SpaceJam that are not inherited by anything, and are generally small.
 # (Large classes belong in their own script files!)
 
 
-class SpaceJamUniverse(ModelObject, SphereCollider):
+class SpaceJamUniverse(ModelWithSphereCollider):
     """ObjectWithModel representing the Universe (skybox)"""
 
     def __init__(self, loader: Loader, scene_node: NodePath):
-        ModelObject.__init__(
-            self, loader, "./Assets/Universe/Universe.obj", scene_node, "Universe"
+        ModelWithSphereCollider.__init__(
+            self, loader, "./Assets/Universe/Universe.obj", scene_node, "Universe", True
         )
-        SphereCollider.__init__(self, self.modelNode, "Universe", True)
         self.modelNode.setScale(90000)
 
 
