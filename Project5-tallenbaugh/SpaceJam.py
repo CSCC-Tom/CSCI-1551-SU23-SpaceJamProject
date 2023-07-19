@@ -3,7 +3,6 @@ from direct.showbase.ShowBase import ShowBase
 from direct.gui.DirectGui import *
 from pandac.PandaModules import TextNode, CollisionHandlerPusher, CollisionTraverser
 from Classes import SpaceJamClasses, SpaceJamPlayer
-from Classes.Player import ShipMovement
 from Classes.Debug.SpaceJamDebug import DebugActions
 
 

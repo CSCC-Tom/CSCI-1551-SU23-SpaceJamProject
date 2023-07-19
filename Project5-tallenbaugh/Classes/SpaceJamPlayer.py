@@ -1,6 +1,5 @@
 from panda3d.core import Loader, NodePath
-from Classes.GameObjects.GameModel import ModelObject
-from Classes.GameObjects.GameCollider import SphereCollider
+from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
 from Classes.Player.ShipWeapon import ShipCannon
 from Classes.Player.ShipMovement import ShipMovement
 from Classes.Player.PlayerInput import PlayerInput
@@ -10,7 +9,7 @@ from direct.task.Task import TaskManager
 from typing import Callable
 
 
-class PlayerController(ModelObject, SphereCollider):
+class PlayerController(ModelWithSphereCollider):
     """The all-important class managing the Player object. The interface between the human player and the game! Controls the player ship and camera and maps the input."""
 
     def __init__(
@@ -21,10 +20,9 @@ class PlayerController(ModelObject, SphereCollider):
         camera: NodePath,
         inputAccept: Callable[[str, Callable, []], None],
     ):
-        ModelObject.__init__(
+        ModelWithSphereCollider.__init__(
             self, loader, "./Assets/TheBorg/theBorg.egg", scene_node, "Player"
         )
-        SphereCollider.__init__(self, self.modelNode, "Player")
 
         # Set up our movement module. (Expected by input.)
         self.movement = ShipMovement(

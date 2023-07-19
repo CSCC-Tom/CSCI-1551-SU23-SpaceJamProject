@@ -1,8 +1,10 @@
 from panda3d.core import Loader, PandaNode, NodePath, Vec3, LColor
 from Classes import SpaceJamFunctions
 from Classes.GameObjects.GameModel import ModelObject
-from Classes.GameObjects.GameCollider import SphereCollider, CapsuleCollider
-from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
+from Classes.GameObjects.ModelWithCollider import (
+    ModelWithSphereCollider,
+    ModelWithCapsuleCollider,
+)
 
 # Script containing primarily "end leaf" classes for SpaceJam that are not inherited by anything, and are generally small.
 # (Large classes belong in their own script files!)
@@ -18,7 +20,7 @@ class SpaceJamUniverse(ModelWithSphereCollider):
         self.modelNode.setScale(90000)
 
 
-class SpaceJamPlanet(ModelObject, SphereCollider):
+class SpaceJamPlanet(ModelWithSphereCollider):
     """SphereCollidableObject representing a Planet"""
 
     def __init__(
@@ -30,8 +32,9 @@ class SpaceJamPlanet(ModelObject, SphereCollider):
         position: Vec3,
         scale: float,
     ):
-        ModelObject.__init__(self, loader, model_path, parent_node, node_name)
-        SphereCollider.__init__(self, self.modelNode, node_name)
+        ModelWithSphereCollider.__init__(
+            self, loader, model_path, parent_node, node_name
+        )
 
         # Note position of 0 above to make sure the collider matches visual position, and then both are moved by moving the parent modelNode.
         self.modelNode.setPos(position)
@@ -77,31 +80,29 @@ class SpaceJamSolarSystem(PandaNode):
         self.bbq.replaceTextureOnModel(loader, "./Assets/Planets/bbq.jpeg")
 
 
-class SpaceJamBase(CapsuleCollider):
+class SpaceJamBase(ModelWithCapsuleCollider):
     """SphereCollidableObject that also manages a swarm of Defenders"""
 
     def __init__(self, loader: Loader, parent_node: NodePath, pos: Vec3):
-        self.node = NodePath(parent_node)
-        CapsuleCollider.__init__(
+        ModelWithCapsuleCollider.__init__(
             self,
-            self.node,
-            "SpaceBaseA",
+            loader,
+            "./Assets/Universe/Universe.obj",
+            parent_node,
+            "SpaceBase",
             (0, 0, 0),
             (0.75, 0, 0),
         )
-        self.baseModelA = ModelObject(
-            loader, "./Assets/Universe/Universe.obj", self.node, "SpaceBaseA"
-        )
         self.baseModelB = ModelObject(
-            loader, "./Assets/Universe/Universe.obj", self.node, "SpaceBaseB"
+            loader, "./Assets/Universe/Universe.obj", self.modelNode, "SpaceBaseB"
         )
         self.baseModelB.modelNode.setPos((0.75, 0, 0))
-        self.node.setPos(pos)
-        self.node.setScale(1.5)
+        self.modelNode.setPos(pos)
+        self.modelNode.setScale(1.5)
 
         self.defenders: list[SpaceJamDefender] = []
-        self.spawnDefenders(loader, self.node, 100, 0, (1, 0, 0, 1))
-        self.spawnDefenders(loader, self.node, 100, 1, (0, 1, 0, 1))
+        self.spawnDefenders(loader, self.modelNode, 100, 0, (1, 0, 0, 1))
+        self.spawnDefenders(loader, self.modelNode, 100, 1, (0, 1, 0, 1))
         # print("Space Jam Base placed at " + str(pos))
 
     def spawnDefenders(
@@ -138,7 +139,7 @@ class SpaceJamBase(CapsuleCollider):
             )
 
 
-class SpaceJamDefender(ModelObject, SphereCollider):
+class SpaceJamDefender(ModelWithSphereCollider):
     """Object spawned and managed by a Base that has a model and collider"""
 
     def __init__(
@@ -149,14 +150,13 @@ class SpaceJamDefender(ModelObject, SphereCollider):
         col_tint: LColor,
         node_name: str,
     ):
-        ModelObject.__init__(
+        ModelWithSphereCollider.__init__(
             self,
             loader,
             "./Assets/Planets/protoPlanet.obj",
             parent_node,
             node_name + "Model",
         )
-        SphereCollider.__init__(self, self.modelNode, node_name + "Collider")
 
         self.modelNode.setScale(0.5)
         self.modelNode.setPos(pos)
