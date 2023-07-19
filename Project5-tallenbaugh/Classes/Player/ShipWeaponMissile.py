@@ -25,27 +25,43 @@ class PhaserMissile(ProjectileCollisionHandler):
             scene_node,
             "PlayerPhaser",
             self.onProjectileHitNoTargets,
-            self.onProjectileHitSomething,
             start_handling_collisions_cb,
             stop_handling_collisions_cb,
+            ["%(player)ft-into-%(neutral)it", "%(player)ft-into-%(enemy)it"],
         )
+        self.modelColliderNode.cNode.setTag("player", "player")
         self.phaserMissCallback = phaser_miss_callback
         self.phaserHitCallback = phaser_hit_callback
         self.modelColliderNode.modelNode.setScale(0.1)
         self.accept(
-            "PlayerPhaser_SphereColliderSphere_cNode-into-BBQ_SphereColliderSphere_cNode",
-            self.onProjectileHitBBQPlanet,
+            "player-into-neutral",
+            self.onProjectileHitEnvironment,
+        )
+        self.accept(
+            "player-into-base",
+            self.onProjectileHitEnemyBase,
+        )
+        self.accept(
+            "player-into-drone",
+            self.onProjectileHitEnemyDrone,
         )
         print(self.modelColliderNode.cNode.name)
-
-    def onProjectileHitBBQPlanet(self, entry: CollisionEntry):
-        print(entry)
-        self.flightInterruptedByCollision(entry.getIntoNode())
 
     def onProjectileHitNoTargets(self):
         # print("PhaserMissile hit no targets!")
         self.phaserMissCallback(self)
 
-    def onProjectileHitSomething(self, target_collider: CollisionNode):
-        # print("PhaserMissile hit a " + target_collider.name)
-        self.phaserHitCallback(self, target_collider)
+    def onProjectileHitEnvironment(self, entry: CollisionEntry):
+        print("ENVIRONMENT: " + str(entry))
+        self.flightInterruptedByCollision()
+        self.phaserMissCallback(self)
+
+    def onProjectileHitEnemyBase(self, entry: CollisionEntry):
+        print("ENEMY BASE: " + str(entry))
+        self.flightInterruptedByCollision()
+        self.phaserHitCallback(self, entry.getIntoNode())
+
+    def onProjectileHitEnemyDrone(self, entry: CollisionEntry):
+        print("ENEMY DRONE: " + str(entry))
+        self.flightInterruptedByCollision()
+        self.phaserHitCallback(self, entry.getIntoNode())

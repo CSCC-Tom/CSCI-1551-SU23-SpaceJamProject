@@ -27,3 +27,4 @@ class EnemyBaseDrone(ModelWithSphereCollider):
         self.modelNode.setPos(pos)
         self.modelNode.setColorScale(col_tint)
         # print("Spawned Defender(" + node_name + ")")
+        self.cNode.setTag("enemy", "drone")

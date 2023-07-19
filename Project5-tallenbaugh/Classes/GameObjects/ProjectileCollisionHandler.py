@@ -1,4 +1,4 @@
-from panda3d.core import Loader, NodePath, CollisionNode
+from panda3d.core import Loader, NodePath
 from pandac.PandaModules import CollisionHandler, CollisionHandlerEvent
 from typing import Callable
 from Classes.GameObjects.Projectile import ProjectileObject
@@ -12,22 +12,21 @@ class ProjectileCollisionHandler(ProjectileObject):
         parent_node: NodePath,
         node_name: str,
         flight_concluded_callback: Callable[[], None],
-        flight_interrupted_callback: Callable[[CollisionNode], None],
         start_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
         stop_handling_collisions_cb: Callable[[NodePath], None],
+        collision_in_patterns: list[str],
     ):
         ProjectileObject.__init__(
             self, loader, model_path, parent_node, node_name, flight_concluded_callback
         )
         self.collisionHandler = CollisionHandlerEvent()
-        self.collisionHandler.addInPattern("%fn-into-%in")
-        self.flightInterruptedCallback = flight_interrupted_callback
+        for in_pattern in collision_in_patterns:
+            self.collisionHandler.add_in_pattern(in_pattern)
         self.startHandlingCollisionsCB = start_handling_collisions_cb
         self.stopHandlingCollisionsCB = stop_handling_collisions_cb
 
-    def flightInterruptedByCollision(self, target_collider: CollisionNode):
+    def flightInterruptedByCollision(self):
         self.concludeFlight(True)
-        self.flightInterruptedCallback(target_collider)
 
     def commenceFlight(self):
         ProjectileObject.commenceFlight(self)

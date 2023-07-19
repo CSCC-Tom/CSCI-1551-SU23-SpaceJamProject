@@ -62,6 +62,7 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
         self.spawnDefenders(loader, self.modelNode, 100, 0, (1, 0, 0, 1))
         self.spawnDefenders(loader, self.modelNode, 100, 1, (0, 1, 0, 1))
         # print("Space Jam Base placed at " + str(pos))
+        self.cNode.setTag("enemy", "base")
 
     def spawnDefenders(
         self,

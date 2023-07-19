@@ -24,3 +24,4 @@ class SpaceJamPlanet(ModelWithSphereCollider):
         self.modelNode.setPos(position)
         # Note scale of 1 above to make sure the collider matches visual size, and THEN we scale both up together by scaling the parent modelNode.
         self.modelNode.setScale(scale)
+        self.cNode.setTag("neutral", "neutral")
