@@ -1,5 +1,5 @@
 from panda3d.core import Loader, NodePath
-from Classes.BaseClasses import ModelObject
+from Classes.GameObjects.GameModel import ModelObject
 from Classes.CollisionBaseClasses import SphereCollider
 from Classes.Player.ShipWeapon import ShipCannon
 from Classes.Player.ShipMovement import ShipMovement

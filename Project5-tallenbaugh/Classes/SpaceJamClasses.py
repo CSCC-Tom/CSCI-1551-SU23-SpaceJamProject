@@ -1,6 +1,6 @@
 from panda3d.core import Loader, PandaNode, NodePath, Vec3, LColor
 from Classes import SpaceJamFunctions
-from Classes.BaseClasses import ModelObject
+from Classes.GameObjects.GameModel import ModelObject
 from Classes.CollisionBaseClasses import SphereCollider, CapsuleCollider
 
 # Script containing primarily "end leaf" classes for SpaceJam that are not inherited by anything, and are generally small.
