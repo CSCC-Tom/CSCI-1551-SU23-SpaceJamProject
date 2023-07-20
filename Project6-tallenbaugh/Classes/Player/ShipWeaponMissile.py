@@ -3,6 +3,7 @@ from pandac.PandaModules import Vec3, CollisionHandler, CollisionEntry
 from Classes.GameObjects.ProjectileCollisionHandler import ProjectileCollisionHandler
 from typing import Callable
 from direct.particles.ParticleEffect import ParticleEffect
+import os
 
 
 class PhaserMissile(ProjectileCollisionHandler):
@@ -48,9 +49,15 @@ class PhaserMissile(ProjectileCollisionHandler):
             self.onProjectileHitEnemyDrone,
         )
         self.explosionEffect = ParticleEffect()
-        self.explosionEffect.loadConfig(
-            "/c/CSCC/CSCC-SU23-1551/SpaceJamRepo/Project6-tallenbaugh/Assets/Particles/RetroExplosion.ptf"
+        # Root folder is "up three levels" from this exact file
+        dirname = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        dirname = dirname.replace("C:\\", "/c/")
+        dirname = dirname.replace("\\", "/")
+        # Particle is at following path from root
+        explosion_filename = os.path.join(
+            dirname, "Assets", "Particles", "RetroExplosion.ptf"
         )
+        self.explosionEffect.loadConfig(explosion_filename)
 
     def onProjectileHitNoTargets(self):
         # print("PhaserMissile hit no targets!")
