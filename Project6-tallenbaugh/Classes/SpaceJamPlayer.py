@@ -1,9 +1,9 @@
 from panda3d.core import Loader, NodePath
 from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
-from Classes.Player.ShipWeapon import ShipCannon
-from Classes.Player.ShipWeaponMissile import PhaserMissile
-from Classes.Player.ShipMovement import ShipMovement
-from Classes.Player.PlayerInput import PlayerInput
+from Classes.Player.Weapon import ShipCannon
+from Classes.Player.WeaponProjectile import PhaserMissile
+from Classes.Player.Movement import ShipThrusters
+from Classes.Player.Input import PlayerActionHandler
 from Classes.Enemy.EnemyDrone import EnemyBaseDrone
 from direct.task import Task
 from pandac.PandaModules import Vec3, CollisionHandler, CollisionHandlerPusher
@@ -29,7 +29,7 @@ class PlayerController(ModelWithSphereCollider):
         )
 
         # Set up our movement module. (Expected by input.)
-        self.movement = ShipMovement(
+        self.movement = ShipThrusters(
             self.modelNode,
             self.getShipPos,
             self.getShipHpr,
@@ -47,7 +47,9 @@ class PlayerController(ModelWithSphereCollider):
             stop_handling_collisions_cb,
         )
         # Set up our input, which requires both the movement and cannon module to work.
-        self.input = PlayerInput(input_accept, self.movement, self.cannon, taskMgr)
+        self.input = PlayerActionHandler(
+            input_accept, self.movement, self.cannon, taskMgr
+        )
 
         # Ship model is huge. Not ideal; scaling it down for now.
         self.modelNode.setScale(0.1)

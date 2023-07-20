@@ -1,6 +1,7 @@
 from typing import Callable
 from direct.gui.OnscreenText import TextNode, OnscreenText
-from Classes.Player import ShipMovement as SM
+from Classes.Player import Movement
+from Classes.Player.Movement import ShipThrusters
 
 
 class DebugActions:
@@ -9,7 +10,7 @@ class DebugActions:
     def __init__(
         self,
         input_accept: Callable[[str, Callable, []], None],
-        player_movement: SM.ShipMovement,
+        player_movement: ShipThrusters,
     ):
         self.superSpeedActive = False
         self.playerMovement = player_movement
@@ -32,7 +33,7 @@ class DebugActions:
 
         self.superSpeedActive = not self.superSpeedActive
         self.playerMovement.thrustRate = (
-            SM.DEFAULT_PLAYER_THRUST_RATE if not self.superSpeedActive else 9000
+            Movement.DEFAULT_PLAYER_THRUST_RATE if not self.superSpeedActive else 9000
         )
         self.debugOST.text = (
             "[s] -> superspeed("

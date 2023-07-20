@@ -1,4 +1,4 @@
-from panda3d.core import Loader, NodePath, CollisionNode
+from panda3d.core import Loader, NodePath
 from pandac.PandaModules import Vec3
 from direct.showbase.DirectObject import DirectObject
 from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider

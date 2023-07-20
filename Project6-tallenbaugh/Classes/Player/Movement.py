@@ -8,7 +8,7 @@ DEFAULT_PLAYER_ROTATION_RATE = 2
 DEFAULT_PLAYER_THRUST_RATE = 1
 
 
-class ShipMovement:
+class ShipThrusters:
     """Class to help manage ship movement"""
 
     def __init__(

@@ -1,5 +1,5 @@
 from panda3d.core import Loader, NodePath, CollisionNode
-from pandac.PandaModules import Vec3, CollisionHandler, CollisionEntry
+from pandac.PandaModules import CollisionHandler, CollisionEntry
 from Classes.GameObjects.ProjectileCollisionHandler import ProjectileCollisionHandler
 from typing import Callable
 from direct.particles.ParticleEffect import ParticleEffect

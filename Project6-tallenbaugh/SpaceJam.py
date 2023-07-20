@@ -1,9 +1,8 @@
 import sys
 from direct.showbase.ShowBase import ShowBase
-from direct.gui.DirectGui import *
-from panda3d.core import NodePath
-from pandac.PandaModules import TextNode, CollisionTraverser, CollisionHandler
+from Classes.HUD.HeadsUpDisplay import SpaceJamHeadsUpDisplay
 from Classes.SpaceJamPlayer import PlayerController
+from Classes.Gameplay.Traversal import SpaceJamTraverser
 from Classes.Environment.Universe import SpaceJamUniverse
 from Classes.Environment.SolarSystem import SpaceJamSolarSystem
 from Classes.Enemy.EnemyBase import SpaceJamEnemyBase
@@ -19,82 +18,26 @@ def quit():
 class SpaceJam(ShowBase):
     """Base class for the whole Space Jam game, that interfaces with the ShowBase of the Panda3D library."""
 
-    def addTitle(self, text: str):
-        """Function to put title on the screen."""
-        self.title = OnscreenText(
-            text=text,
-            style=1,
-            fg=(1, 1, 1, 1),
-            pos=(0.0, -0.95),
-            align=TextNode.ACenter,
-            scale=0.07,
-        )
-
-    def addOnscreenCoreKeyBindings(self):
-        """Function to put title on the screen."""
-        self.coreKeyInstructions = OnscreenText(
-            text="[escape] -> quit",
-            style=1,
-            fg=(1, 1, 1, 1),
-            pos=(-1.3, 0.925),
-            align=TextNode.ALeft,
-            scale=0.07,
-        )
-
-    def addOnscreenPlayerKeyBindings(self):
-        """Function to put title on the screen."""
-
-        instructions_text = (
-            "[arrow_right] -> turn heading right/clockwise\n"
-            + "[arrow_left] -> turn heading left/counter-cw\n"
-            + "[arrow_up] -> turn pitch up/cw\n"
-            + "[arrow_down] -> turn pitch down/ccw\n"
-            + "[a] -> turn roll left/ccw\n"
-            + "[d] -> turn roll right/cw\n"
-            + "[space] -> thrust / move forward\n"
-            + "[f] -> fire missile (if missile is ready)"
-        )
-        self.playerKeyInstructions = OnscreenText(
-            text=instructions_text,
-            style=1,
-            fg=(1, 1, 1, 1),
-            pos=(-1.3, 0.825),
-            align=TextNode.ALeft,
-            scale=0.07,
-        )
-
     def assignCoreKeyBindings(self):
         """Key bindings that involve very core game functions. Currently maps the escape key to the Quit function."""
         self.accept("escape", quit)
-        self.addOnscreenCoreKeyBindings()
-
-    def preparePlayerTraverser(self):
-        if not isinstance(self.player, PlayerController):
-            raise AssertionError(
-                "Space Jam called preparePlayerTraverser() but did not have a self.player!"
-            )
-        self.cTrav = CollisionTraverser()
-        self.cTrav.traverse(self.render)
-        self.cTrav.addCollider(self.player.cNode, self.player.pusher)
-        self.cTrav.showCollisions(self.render)
-
-    def startTrackingCollisionsForHandler(
-        self, collider_node: NodePath, collision_handler: CollisionHandler
-    ):
-        self.cTrav.addCollider(collider_node, collision_handler)
-
-    def stopTrackingCollisionsForHandler(self, collider_node: NodePath):
-        self.cTrav.removeCollider(collider_node)
+        self.hud.addOnscreenCoreKeyBindings()
 
     def __init__(self):
         ShowBase.__init__(self)
 
-        self.addTitle("SPACE JAM CLASS EXAMPLE")
+        # Onscreen text
+        self.hud = SpaceJamHeadsUpDisplay()
+
+        self.hud.addTitle("SPACE JAM CLASS EXAMPLE")
 
         self.assignCoreKeyBindings()
+        self.enableParticles()  # <-- Particles won't work without this
 
-        self.enableParticles()
+        # Collisions and traversal
+        self.traverser = SpaceJamTraverser()
 
+        # Game environment / enemies
         self.universe = SpaceJamUniverse(self.loader, self.render)
         self.planets = SpaceJamSolarSystem(self.loader, self.render)
         self.baseA = SpaceJamEnemyBase(
@@ -106,20 +49,27 @@ class SpaceJam(ShowBase):
         if self.camera == None:
             raise AssertionError("Game did not have a valid camera!")
 
+        # Player
         self.player = PlayerController(
             self.loader,
             self.render,
             self.taskMgr,
             self.camera,
             self.accept,
-            self.startTrackingCollisionsForHandler,
-            self.stopTrackingCollisionsForHandler,
+            self.traverser.startTrackingCollisionsForHandler,
+            self.traverser.stopTrackingCollisionsForHandler,
         )
 
         # Moves the ship somewhere reasonable outside of the Sun
         self.player.modelNode.setPos((50, 60, 30))
-        self.addOnscreenPlayerKeyBindings()
-        self.preparePlayerTraverser()
+        self.hud.addOnscreenPlayerKeyBindings()
+
+        # Now that the player exists, our Traverser can do its thing with it.
+        self.traverser.preparePlayerTraverser(self.render, self.player)
+
+        # Finally Panda3D needs us to assign to this special cTrav on ShowBase
+        # We'll use the one we made in the traverser.
+        self.cTrav = self.traverser.cTrav
 
         # Debug tools
         self.debugActions = DebugActions(self.accept, self.player.movement)

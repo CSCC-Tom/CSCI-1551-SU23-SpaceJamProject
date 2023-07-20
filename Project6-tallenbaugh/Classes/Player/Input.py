@@ -1,10 +1,10 @@
 from typing import Callable
-from Classes.Player.ShipMovement import ShipMovement
-from Classes.Player.ShipWeapon import ShipCannon
+from Classes.Player.Movement import ShipThrusters
+from Classes.Player.Weapon import ShipCannon
 from direct.task.Task import TaskManager
 
 
-class PlayerInput:
+class PlayerActionHandler:
     """Class responsible for handling raw input intended for player actions."""
 
     def __init__(
@@ -13,7 +13,7 @@ class PlayerInput:
         # Here it's saying that "inputAccept" is a function that takes a string, another function, and some list, and returns None.
         # That is actually more accurate than what SpaceJam.accept is designed to take, so the typing is able to guide us.
         input_accept: Callable[[str, Callable, []], None],
-        player_movement: ShipMovement,
+        player_movement: ShipThrusters,
         ship_cannon: ShipCannon,
         task_manager: TaskManager,
     ):

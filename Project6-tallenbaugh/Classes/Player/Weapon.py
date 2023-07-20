@@ -1,5 +1,5 @@
 from panda3d.core import Loader, NodePath
-from Classes.Player.ShipWeaponMissile import PhaserMissile
+from Classes.Player.WeaponProjectile import PhaserMissile
 from pandac.PandaModules import Vec3, CollisionHandler, CollisionNode
 from typing import Callable
 
