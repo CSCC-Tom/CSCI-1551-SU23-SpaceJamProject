@@ -2,7 +2,6 @@ from panda3d.core import Loader, NodePath, CollisionNode
 from pandac.PandaModules import CollisionHandler, CollisionEntry
 from Classes.GameObjects.ProjectileCollisionHandler import ProjectileCollisionHandler
 from typing import Callable
-from direct.particles.ParticleEffect import ParticleEffect
 import os
 
 
@@ -48,16 +47,6 @@ class PhaserMissile(ProjectileCollisionHandler):
             "player-into-drone",
             self.onProjectileHitEnemyDrone,
         )
-        self.explosionEffect = ParticleEffect()
-        # Root folder is "up three levels" from this exact file
-        dirname = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        dirname = dirname.replace("C:\\", "/c/")
-        dirname = dirname.replace("\\", "/")
-        # Particle is at following path from root
-        explosion_filename = os.path.join(
-            dirname, "Assets", "Particles", "RetroExplosion.ptf"
-        )
-        self.explosionEffect.loadConfig(explosion_filename)
 
     def onProjectileHitNoTargets(self):
         # print("PhaserMissile hit no targets!")
@@ -72,10 +61,8 @@ class PhaserMissile(ProjectileCollisionHandler):
         print("ENEMY BASE: " + str(entry))
         self.flightInterruptedByCollision()
         self.phaserHitCallback(self, entry.getIntoNode())
-        self.explosionEffect.start(entry.getIntoNodePath(), self.sceneNodeParent)
 
     def onProjectileHitEnemyDrone(self, entry: CollisionEntry):
         print("ENEMY DRONE: " + str(entry))
         self.flightInterruptedByCollision()
         self.phaserHitCallback(self, entry.getIntoNode())
-        self.explosionEffect.start(entry.getIntoNodePath(), self.sceneNodeParent)

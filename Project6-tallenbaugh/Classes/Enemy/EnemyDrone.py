@@ -2,6 +2,8 @@ from panda3d.core import Loader, NodePath, Vec3, LColor
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithSphereCollider,
 )
+from Classes.GameObjects.ParticleExplosionRetro import RetroExplosionEffect
+import threading
 
 
 class EnemyBaseDrone(ModelWithSphereCollider):
@@ -28,3 +30,27 @@ class EnemyBaseDrone(ModelWithSphereCollider):
         self.modelNode.setColorScale(col_tint)
         # print("Spawned Defender(" + node_name + ")")
         self.cNode.setTag("enemy", "drone")
+
+    def beginDeath(self):
+        # Start our explosion effect
+        self.deathExplosion = RetroExplosionEffect(
+            self.modelNode,
+            self.modelNode.parent.parent
+            # modelNode.parent should be the enemy base
+            # parent of that should be the spacejam render
+        )
+        self.cNode.removeNode()
+        self.deathTimer = threading.Timer(1, self.midDeath)
+        self.deathTimer.start()
+
+    def midDeath(self):
+        self.modelNode.hide()
+        self.deathTimer = threading.Timer(1, self.concludeDeath)
+        self.deathTimer.start()
+
+    def concludeDeath(self):
+        # modelNode is the heart nodepath of a ModelWithCollider object
+        # When "removeNode" is called, Panda will no longer have any references to this drone
+        # and it will be removed from memory and will disappear.
+        self.deathExplosion.explosionEffect.cleanup()
+        self.modelNode.removeNode()

@@ -72,9 +72,10 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
         for d in self.defenders:
             if d.cNode.name == droneCNode.name:
                 self.dronesDestroyed += 1
+                # Removes from list of defenders, but does not yet "destroy"
                 self.defenders.remove(d)
-                # modelNode is the heart nodepath of a ModelWithCollider object
-                d.modelNode.removeNode()
+                # Let the drone destroy itself (allows managed particle effect)
+                d.beginDeath()
                 print("Drones Destroyed: " + str(self.dronesDestroyed))
                 return
 
