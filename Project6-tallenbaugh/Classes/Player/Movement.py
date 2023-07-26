@@ -11,6 +11,9 @@ DEFAULT_PLAYER_THRUST_RATE = 1
 class ShipThrusters:
     """Class to help manage ship movement"""
 
+    rotationRate = DEFAULT_PLAYER_ROTATION_RATE
+    thrustRate = DEFAULT_PLAYER_THRUST_RATE
+
     def __init__(
         self,
         ship_model_node: NodePath,
@@ -28,9 +31,6 @@ class ShipThrusters:
         # empty-object target to help the ship stay oriented in desired rotations without fancy Euler logic
         self.lookTarget = NodePath("Player Look Target")
         self.lookTarget.setPosHpr(self.getShipPos(), self.getShipHpr())
-
-        self.rotationRate = DEFAULT_PLAYER_ROTATION_RATE
-        self.thrustRate = DEFAULT_PLAYER_THRUST_RATE
 
         self.shipModelNode = ship_model_node
 

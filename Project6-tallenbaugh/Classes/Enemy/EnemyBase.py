@@ -87,12 +87,11 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
             )
         for pos in def_positions:
             # print("Spawned defender in pattern " + str(pattern) + " at pos " + str(pos))
-            self.defenders.append(
-                EnemyBaseDrone(
-                    loader,
-                    parent_node,
-                    pos,
-                    color_tint,
-                    parent_node.name + "def" + str(len(self.defenders)),
-                )
+            spawned = EnemyBaseDrone(
+                loader,
+                parent_node,
+                pos,
+                color_tint,
+                parent_node.name + "def" + str(len(self.defenders)),
             )
+            self.defenders.append(spawned)

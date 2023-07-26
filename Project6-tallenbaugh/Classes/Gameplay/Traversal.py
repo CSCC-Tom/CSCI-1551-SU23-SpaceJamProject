@@ -4,18 +4,18 @@ from Classes.SpaceJamPlayer import PlayerController
 
 
 class SpaceJamTraverser:
-    """Class to handle core traversal and collisions for the game."""
+    """Wrapper class around Panda3D CollisionTraverser to handle our game's core traversal and collisions."""
 
     def preparePlayerTraverser(self, render: NodePath, player: PlayerController):
-        self.cTrav = CollisionTraverser()
-        self.cTrav.traverse(render)
-        self.cTrav.addCollider(player.cNode, player.pusher)
-        self.cTrav.showCollisions(render)
+        self.ct = CollisionTraverser()
+        self.ct.traverse(render)
+        self.ct.addCollider(player.cNode, player.pusher)
+        self.ct.showCollisions(render)
 
     def startTrackingCollisionsForHandler(
         self, collider_node: NodePath, collision_handler: CollisionHandler
     ):
-        self.cTrav.addCollider(collider_node, collision_handler)
+        self.ct.addCollider(collider_node, collision_handler)
 
     def stopTrackingCollisionsForHandler(self, collider_node: NodePath):
-        self.cTrav.removeCollider(collider_node)
+        self.ct.removeCollider(collider_node)

@@ -6,7 +6,12 @@ from Classes.Player.Movement import ShipThrusters
 from Classes.Player.Input import PlayerActionHandler
 from Classes.Enemy.EnemyDrone import EnemyBaseDrone
 from direct.task import Task
-from pandac.PandaModules import Vec3, CollisionHandler, CollisionHandlerPusher
+from pandac.PandaModules import (
+    Vec3,
+    CollisionHandler,
+    CollisionHandlerPusher,
+    CollisionNode,
+)
 from direct.task.Task import TaskManager
 from typing import Callable
 
@@ -45,6 +50,7 @@ class PlayerController(ModelWithSphereCollider):
             self.getShipForward,
             start_handling_collisions_cb,
             stop_handling_collisions_cb,
+            self.onPlayerMissileHitEnemyDrone,
         )
         # Set up our input, which requires both the movement and cannon module to work.
         self.input = PlayerActionHandler(
@@ -108,6 +114,8 @@ class PlayerController(ModelWithSphereCollider):
         return task.cont
 
     def onPlayerMissileHitEnemyDrone(
-        self, missile: PhaserMissile, target_drone: EnemyBaseDrone
+        self, missile: PhaserMissile, target_drone_cNode: CollisionNode
     ):
-        print("A " + missile.modelColliderNode.name + " hit a " + target_drone.name)
+        print(
+            "A " + missile.modelColliderNode.name + " hit a " + target_drone_cNode.name
+        )
