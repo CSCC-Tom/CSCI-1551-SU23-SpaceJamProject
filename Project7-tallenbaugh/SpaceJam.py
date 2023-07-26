@@ -46,6 +46,9 @@ class SpaceJam(ShowBase):
             self.render,
             "SpaceBaseA",
             self.solarSystem.mercury.modelNode.getPos() + (8, -8, -8),
+            self.solarSystem.mercury.modelNode,
+            self.clock,
+            self.taskMgr,
         )
 
         if self.camera == None:

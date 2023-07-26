@@ -1,8 +1,10 @@
-from panda3d.core import Loader, NodePath, Vec3, LColor, CollisionNode
+from panda3d.core import Loader, NodePath, Vec3, LColor, CollisionNode, ClockObject
+from direct.task.Task import TaskManager
 from Classes.GameObjects.GameModel import ModelObject
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithCapsuleCollider,
 )
+from Classes.GameObjects.ObjectOrbiter import ObjectOrbiter
 from Classes.Enemy.EnemyDrone import EnemyBaseDrone
 
 
@@ -44,7 +46,14 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
     dronesDestroyed = 0
 
     def __init__(
-        self, loader: Loader, parent_node: NodePath, base_name: str, pos: Vec3
+        self,
+        loader: Loader,
+        parent_node: NodePath,
+        base_name: str,
+        pos: Vec3,
+        orbit_around: NodePath,
+        global_clock: ClockObject,
+        task_manager: TaskManager,
     ):
         ModelWithCapsuleCollider.__init__(
             self,
@@ -67,6 +76,11 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
         self.spawnDefenders(loader, self.modelNode, 100, 1, (0, 1, 0, 1))
         # print("Space Jam Base placed at " + str(pos))
         self.cNode.setTag("enemy", "base")
+
+        self.orbiter = ObjectOrbiter(
+            self.modelNode, orbit_around, global_clock, task_manager, 10, 0, True
+        )
+        self.orbiter.startOrbiting()
 
     def droneWasDestroyed(self, droneCNode: CollisionNode):
         for d in self.defenders:
