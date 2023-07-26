@@ -28,6 +28,7 @@ class PlayerController(ModelWithSphereCollider):
         input_accept: Callable[[str, Callable, []], None],
         start_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
         stop_handling_collisions_cb: Callable[[NodePath], None],
+        player_destroyed_drone_cb: Callable[[CollisionNode], None],
     ):
         ModelWithSphereCollider.__init__(
             self, loader, "./Assets/TheBorg/theBorg.egg", scene_node, "Player"
@@ -52,6 +53,7 @@ class PlayerController(ModelWithSphereCollider):
             stop_handling_collisions_cb,
             self.onPlayerMissileHitEnemyDrone,
         )
+        self.destroyEnemyDroneCallback = player_destroyed_drone_cb
         # Set up our input, which requires both the movement and cannon module to work.
         self.input = PlayerActionHandler(
             input_accept, self.movement, self.cannon, taskMgr
@@ -119,3 +121,7 @@ class PlayerController(ModelWithSphereCollider):
         print(
             "A " + missile.modelColliderNode.name + " hit a " + target_drone_cNode.name
         )
+        # When we hit an enemy drone, we want:
+        # - Reload the ship (ship cannon handles this on the way up to this callback)
+        # - Destroy the drone (we will request it from the EnemyBase)
+        self.destroyEnemyDroneCallback(target_drone_cNode)

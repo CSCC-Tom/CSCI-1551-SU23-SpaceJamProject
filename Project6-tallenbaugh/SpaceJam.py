@@ -44,6 +44,7 @@ class SpaceJam(ShowBase):
         self.baseA = SpaceJamEnemyBase(
             self.loader,
             self.render,
+            "SpaceBaseA",
             self.solarSystem.mercury.modelNode.getPos() + (8, -8, -8),
         )
 
@@ -59,6 +60,7 @@ class SpaceJam(ShowBase):
             self.accept,
             self.sjTraverser.startTrackingCollisionsForHandler,
             self.sjTraverser.stopTrackingCollisionsForHandler,
+            self.baseA.droneWasDestroyed,
         )
 
         # Moves the ship somewhere reasonable outside of the Sun

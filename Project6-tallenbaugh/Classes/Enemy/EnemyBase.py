@@ -1,4 +1,4 @@
-from panda3d.core import Loader, NodePath, Vec3, LColor
+from panda3d.core import Loader, NodePath, Vec3, LColor, CollisionNode
 from Classes.GameObjects.GameModel import ModelObject
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithCapsuleCollider,
@@ -41,18 +41,22 @@ def CreateLineOfLinePatternsPositionsList(
 class SpaceJamEnemyBase(ModelWithCapsuleCollider):
     """SphereCollidableObject that also manages a swarm of Defenders"""
 
-    def __init__(self, loader: Loader, parent_node: NodePath, pos: Vec3):
+    dronesDestroyed = 0
+
+    def __init__(
+        self, loader: Loader, parent_node: NodePath, base_name: str, pos: Vec3
+    ):
         ModelWithCapsuleCollider.__init__(
             self,
             loader,
             "./Assets/Universe/Universe.obj",
             parent_node,
-            "SpaceBase",
+            base_name,
             (0, 0, 0),
             (0.75, 0, 0),
         )
         self.baseModelB = ModelObject(
-            loader, "./Assets/Universe/Universe.obj", self.modelNode, "SpaceBaseB"
+            loader, "./Assets/Universe/Universe.obj", self.modelNode, base_name + "B"
         )
         self.baseModelB.modelNode.setPos((0.75, 0, 0))
         self.modelNode.setPos(pos)
@@ -63,6 +67,16 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
         self.spawnDefenders(loader, self.modelNode, 100, 1, (0, 1, 0, 1))
         # print("Space Jam Base placed at " + str(pos))
         self.cNode.setTag("enemy", "base")
+
+    def droneWasDestroyed(self, droneCNode: CollisionNode):
+        for d in self.defenders:
+            if d.cNode.name == droneCNode.name:
+                self.dronesDestroyed += 1
+                self.defenders.remove(d)
+                # modelNode is the heart nodepath of a ModelWithCollider object
+                d.modelNode.removeNode()
+                print("Drones Destroyed: " + str(self.dronesDestroyed))
+                return
 
     def spawnDefenders(
         self,
