@@ -6,7 +6,7 @@ import os
 class RetroExplosionEffect(PandaNode):
     """ProjectileObject Missile/Phaser that belongs to the PlayerShip."""
 
-    def __init__(self, objParent: NodePath, sceneNodeParent: NodePath):
+    def __init__(self, obj_parent: NodePath, scene_node_parent: NodePath):
         PandaNode.__init__(self, "ParticleEffectRetroExplosion")
         self.explosionEffect = ParticleEffect()
         # Particle effect loading seems to need a different approach from usual asset loading
@@ -19,4 +19,4 @@ class RetroExplosionEffect(PandaNode):
             dirname, "Assets", "Particles", "RetroExplosion.ptf"
         )
         self.explosionEffect.loadConfig(explosion_filename)
-        self.explosionEffect.start(objParent, sceneNodeParent)
+        self.explosionEffect.start(obj_parent, scene_node_parent)

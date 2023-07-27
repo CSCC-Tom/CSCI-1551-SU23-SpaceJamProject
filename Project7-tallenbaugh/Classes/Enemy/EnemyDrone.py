@@ -1,8 +1,9 @@
-from panda3d.core import Loader, NodePath, Vec3, LColor
+from panda3d.core import NodePath, Vec3, LColor
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithSphereCollider,
 )
 from Classes.GameObjects.ParticleExplosionRetro import RetroExplosionEffect
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 import threading
 
 
@@ -11,7 +12,7 @@ class EnemyBaseDrone(ModelWithSphereCollider):
 
     def __init__(
         self,
-        loader: Loader,
+        base: SpaceJamBase,
         parent_node: NodePath,
         pos: Vec3,
         col_tint: LColor,
@@ -19,7 +20,7 @@ class EnemyBaseDrone(ModelWithSphereCollider):
     ):
         ModelWithSphereCollider.__init__(
             self,
-            loader,
+            base,
             "./Assets/Planets/protoPlanet.obj",
             parent_node,
             node_name + "Model",

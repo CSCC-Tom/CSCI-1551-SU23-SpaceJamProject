@@ -1,6 +1,7 @@
-from panda3d.core import Loader, NodePath, Vec3
+from panda3d.core import NodePath, Vec3
 from Classes.GameObjects.GameModel import ModelObject
 from Classes.GameObjects.GameCollider import SphereCollider, CapsuleCollider
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 
 
 class ModelWithSphereCollider(ModelObject, SphereCollider):
@@ -8,7 +9,7 @@ class ModelWithSphereCollider(ModelObject, SphereCollider):
 
     def __init__(
         self,
-        loader: Loader,
+        base: SpaceJamBase,
         model_path: str,
         parent_node: NodePath,
         node_name: str,
@@ -17,7 +18,7 @@ class ModelWithSphereCollider(ModelObject, SphereCollider):
         sphere_radius: float = 1.0,
     ):
         ModelObject.__init__(
-            self, loader, model_path, parent_node, node_name + "_Model"
+            self, base.loader, model_path, parent_node, node_name + "_Model"
         )
         SphereCollider.__init__(
             self,
@@ -34,7 +35,7 @@ class ModelWithCapsuleCollider(ModelObject, CapsuleCollider):
 
     def __init__(
         self,
-        loader: Loader,
+        base: SpaceJamBase,
         model_path: str,
         parent_node: NodePath,
         node_name: str,
@@ -43,7 +44,7 @@ class ModelWithCapsuleCollider(ModelObject, CapsuleCollider):
         sphere_radius: float = 1.0,
     ):
         ModelObject.__init__(
-            self, loader, model_path, parent_node, node_name + "_Model"
+            self, base.loader, model_path, parent_node, node_name + "_Model"
         )
         CapsuleCollider.__init__(
             self,

@@ -1,7 +1,8 @@
-from panda3d.core import Loader, NodePath, Vec3
+from panda3d.core import Vec3
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithSphereCollider,
 )
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 
 
 class SpaceJamPlanet(ModelWithSphereCollider):
@@ -9,16 +10,13 @@ class SpaceJamPlanet(ModelWithSphereCollider):
 
     def __init__(
         self,
-        loader: Loader,
+        base: SpaceJamBase,
         model_path: str,
-        parent_node: NodePath,
         node_name: str,
         position: Vec3,
         scale: float,
     ):
-        ModelWithSphereCollider.__init__(
-            self, loader, model_path, parent_node, node_name
-        )
+        ModelWithSphereCollider.__init__(self, base, model_path, base.render, node_name)
 
         # Note position of 0 above to make sure the collider matches visual position, and then both are moved by moving the parent modelNode.
         self.modelNode.setPos(position)

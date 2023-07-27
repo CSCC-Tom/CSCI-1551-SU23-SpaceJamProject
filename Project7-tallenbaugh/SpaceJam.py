@@ -7,6 +7,7 @@ from Classes.Environment.Universe import SpaceJamUniverse
 from Classes.Environment.SolarSystem import SpaceJamSolarSystem
 from Classes.Enemy.EnemyBase import SpaceJamEnemyBase
 from Classes.Debug.SpaceJamDebug import DebugActions
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 
 
 def quit():
@@ -38,17 +39,25 @@ class SpaceJam(ShowBase):
         # Saving this to its own special variable because it is our wrapper around the true traverser.
         self.sjTraverser = SpaceJamTraverser()
 
-        # Game environment / enemies
-        self.universe = SpaceJamUniverse(self.loader, self.render)
-        self.solarSystem = SpaceJamSolarSystem(self.loader, self.render)
-        self.baseA = SpaceJamEnemyBase(
+        # Make our base class wrapper that we can pass to our other classes as one simple object.
+        self.base = SpaceJamBase(
             self.loader,
             self.render,
+            self.clock,
+            self.taskMgr,
+            self.camera,
+            self.accept,
+            self.sjTraverser,
+        )
+
+        # Game environment / enemies
+        self.universe = SpaceJamUniverse(self.base)
+        self.solarSystem = SpaceJamSolarSystem(self.base)
+        self.enemyBaseA = SpaceJamEnemyBase(
+            self.base,
             "SpaceBaseA",
             self.solarSystem.mercury.modelNode.getPos() + (8, -8, -8),
             self.solarSystem.mercury.modelNode,
-            self.clock,
-            self.taskMgr,
         )
 
         if self.camera == None:
@@ -56,14 +65,8 @@ class SpaceJam(ShowBase):
 
         # Player
         self.player = PlayerController(
-            self.loader,
-            self.render,
-            self.taskMgr,
-            self.camera,
-            self.accept,
-            self.sjTraverser.startTrackingCollisionsForHandler,
-            self.sjTraverser.stopTrackingCollisionsForHandler,
-            self.baseA.droneWasDestroyed,
+            self.base,
+            self.enemyBaseA.droneWasDestroyed,
         )
 
         # Moves the ship somewhere reasonable outside of the Sun
@@ -71,7 +74,9 @@ class SpaceJam(ShowBase):
         self.hud.addOnscreenPlayerKeyBindings()
 
         # Now that the player exists, our Traverser can do its thing with it.
-        self.sjTraverser.preparePlayerTraverser(self.render, self.player)
+        self.sjTraverser.preparePlayerTraverser(
+            self.render, self.player.cNode, self.player.pusher
+        )
 
         # Finally Panda3D needs us to assign to this special cTrav on ShowBase to a Panda3D CollisionTraverser
         # We'll use the one we made in our wrapper traverser.

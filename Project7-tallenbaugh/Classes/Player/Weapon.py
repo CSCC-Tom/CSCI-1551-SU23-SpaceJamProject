@@ -1,7 +1,8 @@
-from panda3d.core import Loader, NodePath
 from Classes.Player.WeaponProjectile import PhaserMissile
-from pandac.PandaModules import Vec3, CollisionHandler, CollisionNode
+from Classes.Player.GyroSensors import ShipGyroscope
+from pandac.PandaModules import CollisionNode
 from typing import Callable
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 
 
 class ShipCannon:
@@ -9,26 +10,19 @@ class ShipCannon:
 
     def __init__(
         self,
-        loader: Loader,
-        scene_node: NodePath,
-        ship_position_function: Callable[[], Vec3],
-        ship_forward_function: Callable[[], Vec3],
-        start_tracking_missile_cb: Callable[[NodePath, CollisionHandler], None],
-        stop_tracking_missile_cb: Callable[[NodePath], None],
+        base: SpaceJamBase,
+        ship_gyro: ShipGyroscope,
         missile_hit_enemy_drone_cb: Callable[[PhaserMissile, CollisionNode], None],
     ):
         # Start the phaser in "active" so we can call reload to prep it.
         self.activeMissile = PhaserMissile(
-            loader,
-            scene_node,
+            base,
             self.onMissileHitNoTargets,
             self.onMissileHitSomeTarget,
-            start_tracking_missile_cb,
-            stop_tracking_missile_cb,
         )
         self.reloadedMissile = None
-        self.getFirePos = ship_position_function
-        self.getFireDir = ship_forward_function
+        self.getFirePos = ship_gyro.getShipPos
+        self.getFireDir = ship_gyro.getShipForward
         self.onHitDroneCB = missile_hit_enemy_drone_cb
 
         self.reload()

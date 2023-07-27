@@ -1,9 +1,9 @@
-from panda3d.core import Loader, NodePath
 from pandac.PandaModules import Vec3
 from direct.showbase.DirectObject import DirectObject
 from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
 from direct.interval.LerpInterval import LerpPosInterval
 from typing import Callable
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 
 
 class ProjectileObject(DirectObject):
@@ -15,15 +15,14 @@ class ProjectileObject(DirectObject):
 
     def __init__(
         self,
-        loader: Loader,
+        base: SpaceJamBase,
         model_path: str,
-        parent_node: NodePath,
         node_name: str,
         flight_concluded_callback: Callable[[], None],
     ):
         DirectObject.__init__(self)
         self.modelColliderNode = ModelWithSphereCollider(
-            loader, model_path, parent_node, node_name
+            base, model_path, base.render, node_name
         )
         self.flightConcludedCallback = flight_concluded_callback
 

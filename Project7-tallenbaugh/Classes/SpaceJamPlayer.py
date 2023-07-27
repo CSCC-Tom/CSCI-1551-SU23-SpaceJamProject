@@ -1,18 +1,15 @@
-from panda3d.core import Loader, NodePath
 from Classes.GameObjects.ModelWithCollider import ModelWithSphereCollider
 from Classes.Player.Weapon import ShipCannon
 from Classes.Player.WeaponProjectile import PhaserMissile
 from Classes.Player.Movement import ShipThrusters
 from Classes.Player.Input import PlayerActionHandler
-from Classes.Enemy.EnemyDrone import EnemyBaseDrone
+from Classes.Player.GyroSensors import ShipGyroscope
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 from direct.task import Task
 from pandac.PandaModules import (
-    Vec3,
-    CollisionHandler,
     CollisionHandlerPusher,
     CollisionNode,
 )
-from direct.task.Task import TaskManager
 from typing import Callable
 
 
@@ -21,81 +18,45 @@ class PlayerController(ModelWithSphereCollider):
 
     def __init__(
         self,
-        loader: Loader,
-        scene_node: NodePath,
-        taskMgr: TaskManager,
-        camera: NodePath,
-        input_accept: Callable[[str, Callable, []], None],
-        start_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
-        stop_handling_collisions_cb: Callable[[NodePath], None],
+        base: SpaceJamBase,
         player_destroyed_drone_cb: Callable[[CollisionNode], None],
     ):
         ModelWithSphereCollider.__init__(
-            self, loader, "./Assets/TheBorg/theBorg.egg", scene_node, "Player"
+            self, base, "./Assets/TheBorg/theBorg.egg", base.render, "Player"
         )
 
+        # Set up our gyro module. (Expected by other modules.)
+        self.shipGyro = ShipGyroscope(base.render, self.modelNode)
+
         # Set up our movement module. (Expected by input.)
-        self.movement = ShipThrusters(
-            self.modelNode,
-            self.getShipPos,
-            self.getShipHpr,
-            self.getShipForward,
-            self.getShipUp,
-            self.getShipRight,
-        )
+        self.movement = ShipThrusters(self.shipGyro)
+
         # Phaser / Missile Weapon
         self.cannon = ShipCannon(
-            loader,
-            scene_node,
-            self.getShipPos,
-            self.getShipForward,
-            start_handling_collisions_cb,
-            stop_handling_collisions_cb,
+            base,
+            self.shipGyro,
             self.onPlayerMissileHitEnemyDrone,
         )
         self.destroyEnemyDroneCallback = player_destroyed_drone_cb
         # Set up our input, which requires both the movement and cannon module to work.
-        self.input = PlayerActionHandler(
-            input_accept, self.movement, self.cannon, taskMgr
-        )
+        self.input = PlayerActionHandler(base, self.movement, self.cannon)
 
         # Ship model is huge. Not ideal; scaling it down for now.
         self.modelNode.setScale(0.1)
 
         self.replaceTextureOnModel(
-            loader, "./Assets/Planets/angryPlanet.jpg", (0.95, 0.7, 0.8, 1.0)
+            base.loader, "./Assets/Planets/angryPlanet.jpg", (0.95, 0.7, 0.8, 1.0)
         )
-        self.loader = loader
-        self.taskMgr = taskMgr
-        self.scene_node = scene_node
-        self.camera = camera
+        self.loader = base.loader
+        self.taskMgr = base.taskMgr
+        self.scene_node = base.render
+        self.camera = base.camera
 
         # Add the updateCameraTask procedure to the task manager.
         self.taskMgr.add(self.updatePlayerCameraTask, "UpdateCameraTask")
 
         self.pusher = CollisionHandlerPusher()
         self.pusher.addCollider(self.cNode, self.modelNode)
-
-    # CONVENIENCE FUNCTIONS to make other functions more concise and self-describing.
-    def getShipPos(self):
-        """Convenience to get current ship position in space."""
-        return self.modelNode.getPos()
-
-    def getShipHpr(self):
-        """Convenience to get current ship (absolute) rotation in space"""
-        return self.modelNode.getHpr()
-
-    def getShipForward(self):
-        """Convenience to get the vector representing the current forward direction from the ship's perspective"""
-        return self.scene_node.getRelativeVector(self.modelNode, Vec3(0, 1, 0))
-
-    def getShipRight(self):
-        """Convenience to get the vector representing the current right-hand direction from the ship's perspective."""
-        return self.scene_node.getRelativeVector(self.modelNode, Vec3(1, 0, 0))
-
-    def getShipUp(self):
-        """Convenience to get the vector representing the current upward direction from the ship's perspective."""
-        return self.scene_node.getRelativeVector(self.modelNode, Vec3(0, 0, 1))
 
     # CAMERA TASK
     # Define a procedure to move the camera.
@@ -106,10 +67,13 @@ class PlayerController(ModelWithSphereCollider):
         # angleDegrees = task.time * 6.0
         # angleRadians = angleDegrees * (pi / 180.0)
 
+        shipPos = self.shipGyro.getShipPos()
+        # Negative times forward = backward
+        behindOffset = self.shipGyro.getShipForward() * -24
+        aboveOffset = self.shipGyro.getShipUp() * 4
+
         # Move the camera behind, and a little above, the ship. Could space this out over multiple task updates for a more "drifty-feeling" camera.
-        self.camera.setPos(
-            self.getShipPos() - (self.getShipForward() * 24) + (self.getShipUp() * 4)
-        )
+        self.camera.setPos(shipPos + behindOffset + aboveOffset)
 
         # Make the camera match the ship's rotation exactly. (Could use headsUp or lookAt similarly, if you want the camera to look at the player rather than look where the player is looking.)
         self.camera.setHpr(self.modelNode.getHpr())

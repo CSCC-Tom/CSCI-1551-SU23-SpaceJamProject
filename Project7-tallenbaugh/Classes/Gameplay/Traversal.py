@@ -1,15 +1,21 @@
 from panda3d.core import NodePath
-from pandac.PandaModules import CollisionTraverser, CollisionHandler
-from Classes.SpaceJamPlayer import PlayerController
+from pandac.PandaModules import (
+    CollisionTraverser,
+    CollisionHandler,
+    CollisionNode,
+    CollisionHandlerPusher,
+)
 
 
 class SpaceJamTraverser:
     """Wrapper class around Panda3D CollisionTraverser to handle our game's core traversal and collisions."""
 
-    def preparePlayerTraverser(self, render: NodePath, player: PlayerController):
+    def preparePlayerTraverser(
+        self, render: NodePath, cNode: CollisionNode, pusher: CollisionHandlerPusher
+    ):
         self.ct = CollisionTraverser()
         self.ct.traverse(render)
-        self.ct.addCollider(player.cNode, player.pusher)
+        self.ct.addCollider(cNode, pusher)
         self.ct.showCollisions(render)
 
     def startTrackingCollisionsForHandler(

@@ -1,7 +1,7 @@
 import math
-from panda3d.core import NodePath, ClockObject, Vec3
+from panda3d.core import NodePath, Vec3
 from direct.task import Task
-from direct.task.Task import TaskManager
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 
 
 class ObjectOrbiter:
@@ -9,10 +9,9 @@ class ObjectOrbiter:
 
     def __init__(
         self,
+        base: SpaceJamBase,
         orbiter_node: NodePath,
         orbiting_around_node: NodePath,
-        global_clock: ClockObject,
-        task_manager: TaskManager,
         orbit_duration: float,
         # Orbit Type is based on frame of orbiting_around_node.
         orbit_type: int,  # 0 = XY, 1 = XZ, 2 = YZ
@@ -20,10 +19,10 @@ class ObjectOrbiter:
     ):
         self.orbiter = orbiter_node
         self.orbiting = orbiting_around_node
-        self.taskMgr = task_manager
+        self.taskMgr = base.taskMgr
         self.orbitTaskName = self.orbiter.name + "-orbits-" + self.orbiting.name
         self.orbitDuration = orbit_duration
-        self.gClock = global_clock
+        self.gClock = base.clock
         self.orbitType = orbit_type
         self.orbitRadius = orbiter_node.get_distance(orbiting_around_node) * 14
         self.lookAtOrbited = look_at_orbited

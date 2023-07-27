@@ -22,6 +22,12 @@ class ModelObject(PandaNode):
 
         This NodePath should be saved to a self.variable if intended for dynamic logic
         """
+        print(
+            "GameModel passed loader: "
+            + str(loader)
+            + " to load model "
+            + model_asset_path
+        )
         self.modelNode: NodePath = loader.loadModel(model_asset_path)
 
         if not isinstance(self.modelNode, NodePath):

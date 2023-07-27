@@ -1,7 +1,6 @@
 from panda3d.core import NodePath
 from direct.task import Task
-from pandac.PandaModules import Vec3
-from typing import Callable
+from Classes.Player.GyroSensors import ShipGyroscope
 
 # Can play with these values to change how it feels to fly by default
 DEFAULT_PLAYER_ROTATION_RATE = 2
@@ -16,23 +15,18 @@ class ShipThrusters:
 
     def __init__(
         self,
-        ship_model_node: NodePath,
-        ship_position_function: Callable[[], Vec3],
-        ship_hpr_function: Callable[[], Vec3],
-        ship_forward_function: Callable[[], Vec3],
-        ship_up_function: Callable[[], Vec3],
-        ship_right_function: Callable[[], Vec3],
+        ship_gyro: ShipGyroscope,
     ):
-        self.getShipPos = ship_position_function
-        self.getShipHpr = ship_hpr_function
-        self.getShipForward = ship_forward_function
-        self.getShipUp = ship_up_function
-        self.getShipRight = ship_right_function
+        self.getShipPos = ship_gyro.getShipPos
+        self.getShipHpr = ship_gyro.getShipHpr
+        self.getShipForward = ship_gyro.getShipForward
+        self.getShipUp = ship_gyro.getShipUp
+        self.getShipRight = ship_gyro.getShipRight
         # empty-object target to help the ship stay oriented in desired rotations without fancy Euler logic
         self.lookTarget = NodePath("Player Look Target")
         self.lookTarget.setPosHpr(self.getShipPos(), self.getShipHpr())
 
-        self.shipModelNode = ship_model_node
+        self.shipModelNode = ship_gyro.shipNode
 
     # MOVEMENT ACTION HELPERS
     # Called every frame by the Key Event Input Helper tasks

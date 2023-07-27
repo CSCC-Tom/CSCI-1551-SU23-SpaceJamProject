@@ -1,6 +1,6 @@
-from panda3d.core import Loader, NodePath, Vec3, LColor, CollisionNode, ClockObject
-from direct.task.Task import TaskManager
+from panda3d.core import NodePath, Vec3, LColor, CollisionNode
 from Classes.GameObjects.GameModel import ModelObject
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithCapsuleCollider,
 )
@@ -47,39 +47,37 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
 
     def __init__(
         self,
-        loader: Loader,
-        parent_node: NodePath,
+        base: SpaceJamBase,
         base_name: str,
         pos: Vec3,
         orbit_around: NodePath,
-        global_clock: ClockObject,
-        task_manager: TaskManager,
     ):
         ModelWithCapsuleCollider.__init__(
             self,
-            loader,
+            base,
             "./Assets/Universe/Universe.obj",
-            parent_node,
+            base.render,
             base_name,
             (0, 0, 0),
             (0.75, 0, 0),
         )
         self.baseModelB = ModelObject(
-            loader, "./Assets/Universe/Universe.obj", self.modelNode, base_name + "B"
+            base.loader,
+            "./Assets/Universe/Universe.obj",
+            self.modelNode,
+            base_name + "B",
         )
         self.baseModelB.modelNode.setPos((0.75, 0, 0))
         self.modelNode.setPos(pos)
         self.modelNode.setScale(1.5)
 
         self.defenders: list[EnemyBaseDrone] = []
-        self.spawnDefenders(loader, self.modelNode, 100, 0, (1, 0, 0, 1))
-        self.spawnDefenders(loader, self.modelNode, 100, 1, (0, 1, 0, 1))
+        self.spawnDefenders(base, self.modelNode, 100, 0, (1, 0, 0, 1))
+        self.spawnDefenders(base, self.modelNode, 100, 1, (0, 1, 0, 1))
         # print("Space Jam Base placed at " + str(pos))
         self.cNode.setTag("enemy", "base")
 
-        self.orbiter = ObjectOrbiter(
-            self.modelNode, orbit_around, global_clock, task_manager, 10, 0, True
-        )
+        self.orbiter = ObjectOrbiter(base, self.modelNode, orbit_around, 10, 0, True)
         self.orbiter.startOrbiting()
 
     def droneWasDestroyed(self, droneCNode: CollisionNode):
@@ -95,7 +93,7 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
 
     def spawnDefenders(
         self,
-        loader: Loader,
+        base: SpaceJamBase,
         parent_node: NodePath,
         count: int,
         pattern: int,
@@ -117,7 +115,7 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
         for pos in def_positions:
             # print("Spawned defender in pattern " + str(pattern) + " at pos " + str(pos))
             spawned = EnemyBaseDrone(
-                loader,
+                base,
                 parent_node,
                 pos,
                 color_tint,

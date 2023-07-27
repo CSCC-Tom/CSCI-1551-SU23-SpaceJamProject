@@ -1,8 +1,8 @@
-from panda3d.core import Loader, NodePath, CollisionNode
-from pandac.PandaModules import CollisionHandler, CollisionEntry
+from panda3d.core import CollisionNode
+from pandac.PandaModules import CollisionEntry
 from Classes.GameObjects.ProjectileCollisionHandler import ProjectileCollisionHandler
 from typing import Callable
-import os
+from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 
 
 class PhaserMissile(ProjectileCollisionHandler):
@@ -10,27 +10,21 @@ class PhaserMissile(ProjectileCollisionHandler):
 
     def __init__(
         self,
-        loader: Loader,
-        scene_node: NodePath,
+        base: SpaceJamBase,
         phaser_miss_callback: Callable[[ProjectileCollisionHandler], None],
         phaser_hit_callback: Callable[
             [ProjectileCollisionHandler, CollisionNode], None
         ],
-        start_handling_collisions_cb: Callable[[NodePath, CollisionHandler], None],
-        stop_handling_collisions_cb: Callable[[NodePath], None],
     ):
         ProjectileCollisionHandler.__init__(
             self,
-            loader,
+            base,
             "./Assets/Phaser/phaser.egg",
-            scene_node,
             "PlayerPhaser",
             self.onProjectileHitNoTargets,
-            start_handling_collisions_cb,
-            stop_handling_collisions_cb,
             ["%(player)ft-into-%(neutral)it", "%(player)ft-into-%(enemy)it"],
         )
-        self.sceneNodeParent = scene_node
+        self.sceneNodeParent = base.render
         self.modelColliderNode.cNode.setTag("player", "player")
         self.phaserMissCallback = phaser_miss_callback
         self.phaserHitCallback = phaser_hit_callback
