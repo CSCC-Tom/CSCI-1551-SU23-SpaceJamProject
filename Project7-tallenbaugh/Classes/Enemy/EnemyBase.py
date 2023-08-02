@@ -4,7 +4,7 @@ from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithCapsuleCollider,
 )
-from Classes.GameObjects.ObjectOrbiter import ObjectOrbiter
+from Classes.Gameplay.OrbitingLogic import SimpleCircleOrbitTask
 from Classes.Enemy.EnemyDrone import EnemyBaseDrone
 
 
@@ -77,8 +77,10 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
         # print("Space Jam Base placed at " + str(pos))
         self.cNode.setTag("enemy", "base")
 
-        self.orbiter = ObjectOrbiter(base, self.modelNode, orbit_around, 10, 0, True)
-        self.orbiter.startOrbiting()
+        self.orbitTask = SimpleCircleOrbitTask(
+            base, self.modelNode, orbit_around, 10, 0, True
+        )
+        self.orbitTask.startOrbiting()
 
     def droneWasDestroyed(self, droneCNode: CollisionNode):
         for d in self.defenders:
