@@ -4,8 +4,9 @@ from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 from Classes.GameObjects.ModelWithCollider import (
     ModelWithCapsuleCollider,
 )
-from Classes.Gameplay.OrbitingLogic import SimpleCircleOrbitTask
+from Classes.Gameplay.OrbitingLogic import OrbitType, SimpleCircleOrbitTask
 from Classes.Enemy.EnemyDrone import EnemyBaseDrone
+from Classes.Enemy.EnemyTravelDrone import EnemyTravelDrone
 
 
 def CreateLinePatternPositionsList(count: int, origin: Vec3, direction: Vec3):
@@ -74,13 +75,18 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
         self.defenders: list[EnemyBaseDrone] = []
         self.spawnDefenders(base, self.modelNode, 100, 0, (1, 0, 0, 1))
         self.spawnDefenders(base, self.modelNode, 100, 1, (0, 1, 0, 1))
+
+        self.spawnTraveler(base, base_name)
+
         # print("Space Jam Base placed at " + str(pos))
         self.cNode.setTag("enemy", "base")
 
         self.orbitTask = SimpleCircleOrbitTask(
-            base, self.modelNode, orbit_around, 10, 0, True
+            base, self.modelNode, orbit_around, 10, True, OrbitType.XY, True
         )
-        self.orbitTask.startOrbiting()
+
+    def _getLastTravelPos(self):
+        return self.travelerPositions[len(self.travelerPositions) - 1]
 
     def droneWasDestroyed(self, droneCNode: CollisionNode):
         for d in self.defenders:
@@ -124,3 +130,24 @@ class SpaceJamEnemyBase(ModelWithCapsuleCollider):
                 parent_node.name + "def" + str(len(self.defenders)),
             )
             self.defenders.append(spawned)
+
+    def spawnTraveler(
+        self,
+        base: SpaceJamBase,
+        base_name: str,
+    ):
+        self.travelerPositions: list[Vec3] = []
+        self.travelerPositions.append(self.modelNode.getPos())
+        self.travelerPositions.append(self._getLastTravelPos() + (10, 10, 10))
+        self.travelerPositions.append(self._getLastTravelPos() + (-5, 15, -7.5))
+        self.travelerPositions.append(self._getLastTravelPos() + (7.5, -5, 1))
+        self.travelerPositions.append(self.modelNode.getPos())
+        self.traveler = EnemyTravelDrone(
+            base,
+            base.render,
+            self.modelNode.getPos(),
+            (1, 1, 1, 1),
+            base_name + "_Traveller",
+            self.travelerPositions,
+            10,
+        )
