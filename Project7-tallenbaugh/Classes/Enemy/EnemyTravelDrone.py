@@ -5,7 +5,7 @@ from Classes.Enemy.EnemyDrone import (
 from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
 from Classes.Gameplay.TravelerLogic import (
     TravelerRotationStyle,
-    SimplePointBasedTravelTask,
+    PointPositionTravelTask,
 )
 
 
@@ -30,13 +30,13 @@ class EnemyTravelDrone(EnemyBaseDrone):
             col_tint,
             node_name,
         )
-        self.travelLogic = SimplePointBasedTravelTask(
+        self.travelLogic = PointPositionTravelTask(
             base,
             node_name + "_Travel",
             self.modelNode,
             travel_positions,
             travel_duration,
             True,
-            -1,
-            TravelerRotationStyle.StopAndRotateAtEachPoint,
+            3,
+            TravelerRotationStyle.Cycle,
         )

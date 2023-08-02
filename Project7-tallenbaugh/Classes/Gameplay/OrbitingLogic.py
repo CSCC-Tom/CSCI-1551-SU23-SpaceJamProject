@@ -45,7 +45,7 @@ class SimpleCircleOrbitTask:
     def stopOrbiting(self):
         self.taskMgr.remove(self.orbitTaskName)
 
-    def _updateCurrPosForOrbit(self):
+    def updateCurrPosForOrbit(self):
         # Current orbit timer divided by duration is where in the orbit we currently are.
         # print( "RADIUS = " + str(self.orbitRadius) + "; ORBIT = " + str(self.orbitTimer / self.orbitDuration) )
         theta = (self.orbitTimer * 2 * math.pi) / self.orbitDuration
@@ -61,6 +61,45 @@ class SimpleCircleOrbitTask:
             currPos = Vec3(math.sin(theta), math.cos(theta), 0) * self.orbitRadius
 
         self.orbiter.setPos(currPos)
+
+        if self.lookAtOrbited == True:
+            self.orbiter.lookAt(
+                self.orbiting,
+                self.orbiting.parent.getRelativeVector(self.orbiting, (0, 1, 0)),
+            )
+
+    def updateOrbitTimer(self):
+        # Add "Delta Time" (time since last game update) seconds to orbitTimer
+        self.orbitTimer += self.gClock.getDt()
+
+    def orbitTask(self, task: Task):
+        self.updateOrbitTimer()
+        self.updateCurrPosForOrbit()
+
+        return task.cont
+
+
+class DynamicCircleOrbitTask(SimpleCircleOrbitTask):
+    """Logic wrapped around SimpleCircleOrbitTask that will go through all the orbits over time."""
+
+    def __init__(
+        self,
+        base: SpaceJamBase,
+        orbiter_node: NodePath,
+        orbiting_around_node: NodePath,
+        orbit_duration: float,
+        start_immediately: bool = True,
+    ):
+        SimpleCircleOrbitTask.__init__(
+            self,
+            base,
+            orbiter_node,
+            orbiting_around_node,
+            orbit_duration,
+            start_immediately,
+            OrbitType.XY,
+            False,
+        )
 
     def getDurationOfType(self, type: OrbitType):
         if type == OrbitType.XY:
@@ -85,9 +124,8 @@ class SimpleCircleOrbitTask:
 
         return self.orbitTimer - currDuration
 
-    def _updateOrbitTimerAndType(self):
-        # Add "Delta Time" (time since last game update) seconds to orbitTimer
-        self.orbitTimer += self.gClock.getDt()
+    def updateOrbitTimer(self):
+        SimpleCircleOrbitTask.updateOrbitTimer(self)
 
         # Some orbit types start in different positions so for some transitions we want more than one cycle
         currDuration = self.getDurationOfType(self.orbitType)
@@ -97,15 +135,3 @@ class SimpleCircleOrbitTask:
             self.orbitTimer = self.getStartTimerValueForNextType(currDuration)
             self.orbitType = self.getNextTypeFor(self.orbitType)
             print("Orbiter changed type! Is now type " + str(self.orbitType))
-
-    def orbitTask(self, task: Task):
-        self._updateOrbitTimerAndType()
-        self._updateCurrPosForOrbit()
-
-        if self.lookAtOrbited == True:
-            self.orbiter.lookAt(
-                self.orbiting,
-                self.orbiting.parent.getRelativeVector(self.orbiting, (0, 1, 0)),
-            )
-
-        return task.cont
