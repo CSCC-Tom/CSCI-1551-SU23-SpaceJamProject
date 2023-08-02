@@ -1,4 +1,3 @@
-import math
 from enum import Enum
 from panda3d.core import NodePath, Vec3, Quat, look_at
 from direct.task import Task
