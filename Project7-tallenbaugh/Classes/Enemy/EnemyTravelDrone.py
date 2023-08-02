@@ -2,10 +2,11 @@ from panda3d.core import NodePath, Vec3, LColor
 from Classes.Enemy.EnemyDrone import (
     EnemyBaseDrone,
 )
-from Classes.GameObjects.ParticleExplosionRetro import RetroExplosionEffect
 from Classes.Gameplay.SpaceJamPandaBase import SpaceJamBase
-from Classes.Gameplay.TravelerLogic import SimplePointBasedTravelTask
-import threading
+from Classes.Gameplay.TravelerLogic import (
+    TravelerRotationStyle,
+    SimplePointBasedTravelTask,
+)
 
 
 class EnemyTravelDrone(EnemyBaseDrone):
@@ -30,5 +31,12 @@ class EnemyTravelDrone(EnemyBaseDrone):
             node_name,
         )
         self.travelLogic = SimplePointBasedTravelTask(
-            node_name + "_Travel", self.modelNode, travel_positions, travel_duration
+            base,
+            node_name + "_Travel",
+            self.modelNode,
+            travel_positions,
+            travel_duration,
+            True,
+            -1,
+            TravelerRotationStyle.StopAndRotateAtEachPoint,
         )
