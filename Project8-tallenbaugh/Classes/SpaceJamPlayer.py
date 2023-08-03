@@ -14,10 +14,13 @@ from typing import Callable
 class PlayerController(DestructibleShip):
     """The all-important class managing the Player object. The interface between the human player and the game! Controls the player ship and camera and maps the input."""
 
+    victoryInvincibility = False
+
     def __init__(
         self,
         base: SpaceJamBase,
         player_destroyed_drone_cb: Callable[[CollisionNode], None],
+        player_shot_base_cb: Callable[[], None],
         player_was_destroyed_cb: Callable[[], None],
     ):
         DestructibleShip.__init__(
@@ -30,6 +33,8 @@ class PlayerController(DestructibleShip):
             "Player",
         )
         self.timePerDeathStep = 3.0
+        self.destroyEnemyDroneCallback = player_destroyed_drone_cb
+        self.shotEnemyBaseCallback = player_shot_base_cb
         self.onDestroyedCB = player_was_destroyed_cb
         self.shipHull = ShipHull(
             self.modelNode, self.cNode, self.onPlayerShipCollidedWithObject
@@ -46,8 +51,8 @@ class PlayerController(DestructibleShip):
             base,
             self.shipGyro,
             self.onPlayerMissileHitEnemyDrone,
+            self.onPlayerMissileHitEnemyBase,
         )
-        self.destroyEnemyDroneCallback = player_destroyed_drone_cb
         # Set up our input, which requires both the movement and cannon module to work.
         self.input = PlayerActionHandler(base, self.movement, self.cannon)
 
@@ -105,15 +110,25 @@ class PlayerController(DestructibleShip):
     def onPlayerMissileHitEnemyDrone(
         self, missile: PhaserMissile, target_drone_cNode: CollisionNode
     ):
-        print(
-            "A " + missile.modelColliderNode.name + " hit a " + target_drone_cNode.name
-        )
+        # print("Your Missile hit a " + target_drone_cNode.name)
         # When we hit an enemy drone, we want:
         # - Reload the ship (ship cannon handles this on the way up to this callback)
         # - Destroy the drone (we will request it from the EnemyBase)
         self.destroyEnemyDroneCallback(target_drone_cNode)
 
+    def onPlayerMissileHitEnemyBase(
+        self, missile: PhaserMissile, target_base_cNode: CollisionNode
+    ):
+        # print("Your Missile hit a " + target_base_cNode.name)
+        # When we hit an enemy drone, we want:
+        # - Reload the ship (ship cannon handles this on the way up to this callback)
+        # - Destroy the drone (we will request it from the EnemyBase)
+        self.shotEnemyBaseCallback()
+
     def onPlayerShipCollidedWithObject(self, entry: CollisionEntry):
+        if self.victoryInvincibility == True:
+            return
+
         self.shipHull.hitpoints = self.shipHull.hitpoints - 1
         if self.shipHull.hitpoints > 0:
             self.modelNode.setColor((1, 0.8, 0.8, 1))
@@ -122,5 +137,6 @@ class PlayerController(DestructibleShip):
             self.modelNode.setColor((1, 0.5, 0.5, 0))
             print("The ship ran into a " + entry.into_node.name + " and died!")
             self.beginDeath()
+            self.cannon.disable()
             self.input.disable()
             self.onDestroyedCB()

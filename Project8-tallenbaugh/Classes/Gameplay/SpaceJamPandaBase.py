@@ -2,6 +2,7 @@ from panda3d.core import Loader, NodePath, ClockObject
 from typing import Callable
 from direct.task.Task import TaskManager
 from Classes.Gameplay.Traversal import SpaceJamTraverser
+from Classes.HUD.HeadsUpDisplay import SpaceJamHeadsUpDisplay
 
 
 class SpaceJamBase:
@@ -19,6 +20,7 @@ class SpaceJamBase:
         # That is actually more accurate than what SpaceJam.accept is designed to take, so the typing is able to guide us.
         accept: Callable[[str, Callable, []], None],
         sjTraverser: SpaceJamTraverser,
+        hud: SpaceJamHeadsUpDisplay,
     ):
         self.loader = loader
         self.render = render
@@ -27,3 +29,4 @@ class SpaceJamBase:
         self.camera = camera
         self.accept = accept
         self.sjTraverser = sjTraverser
+        self.hud = hud

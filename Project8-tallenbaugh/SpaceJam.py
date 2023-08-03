@@ -39,7 +39,7 @@ class SpaceJam(ShowBase):
         # Onscreen text
         self.hud = SpaceJamHeadsUpDisplay()
 
-        self.hud.addOrUpdateTitle("SPACE JAM CLASS EXAMPLE")
+        self.hud.addOrUpdateTitle("SPACE JAM : Destroy 30 green/red Drones!")
 
         self.assignCoreKeyBindings()
         self.enableParticles()  # <-- Particles won't work without this
@@ -57,6 +57,7 @@ class SpaceJam(ShowBase):
             self.camera,
             self.accept,
             self.sjTraverser,
+            self.hud,
         )
 
         # Game environment / enemies
@@ -67,6 +68,7 @@ class SpaceJam(ShowBase):
             "SpaceBaseA",
             self.solarSystem.mercury.modelNode.getPos() + (8, -8, -8),
             self.solarSystem.mercury.modelNode,
+            self.onBaseWasDestroyed,
         )
 
         if self.camera == None:
@@ -74,7 +76,10 @@ class SpaceJam(ShowBase):
 
         # Player
         self.player = PlayerController(
-            self.base, self.enemyBaseA.droneWasDestroyed, self.onPlayerWasDestroyed
+            self.base,
+            self.enemyBaseA.droneWasDestroyed,
+            self.enemyBaseA.baseWasShot,
+            self.onPlayerWasDestroyed,
         )
 
         # Moves the ship somewhere reasonable outside of the Sun
@@ -95,6 +100,10 @@ class SpaceJam(ShowBase):
 
     def onPlayerWasDestroyed(self):
         self.hud.addOrUpdateTitle("Sorry, You Lost.")
+
+    def onBaseWasDestroyed(self):
+        self.player.victoryInvincibility = True
+        self.hud.addOrUpdateTitle("YOU WON SPACE JAM!!")
 
 
 app = SpaceJam()

@@ -100,6 +100,7 @@ class DynamicCircleOrbitTask(SimpleCircleOrbitTask):
             OrbitType.XY,
             False,
         )
+        self.next_orbit_duration = orbit_duration
 
     def getDurationOfType(self, type: OrbitType):
         if type == OrbitType.XY:
@@ -135,3 +136,10 @@ class DynamicCircleOrbitTask(SimpleCircleOrbitTask):
             self.orbitTimer = self.getStartTimerValueForNextType(currDuration)
             self.orbitType = self.getNextTypeFor(self.orbitType)
             print("Orbiter changed type! Is now type " + str(self.orbitType))
+            if self.orbitDuration != self.next_orbit_duration:
+                print(
+                    "Orbiter slowed down! Now takes "
+                    + str(self.orbitDuration)
+                    + " seconds per orbit."
+                )
+                self.orbitDuration = self.next_orbit_duration

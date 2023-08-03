@@ -60,9 +60,7 @@ class ProjectileObject(DirectObject):
             raise AssertionError(
                 "ProjectileObject.concludeFlight called, but did not call commenceFlight first! Nothing happened."
             )
-        self.flightMovementInterval.setDoneEvent("")
         self.flightMovementInterval.pause()
-        self.flightMovementInterval = {}
         # Stick the "concluded" projectile somewhere far away so we don't see it.
         self.modelColliderNode.modelNode.setPos((9000, 9000, 9000))
         # Call back up to whatever needs to know about the flight being over

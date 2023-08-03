@@ -47,16 +47,16 @@ class PhaserMissile(ProjectileCollisionHandler):
         self.phaserMissCallback(self)
 
     def onProjectileHitEnvironment(self, entry: CollisionEntry):
-        print("ENVIRONMENT: " + str(entry))
+        # print("ENVIRONMENT: " + str(entry))
         self.flightInterruptedByCollision()
         self.phaserMissCallback(self)
 
     def onProjectileHitEnemyBase(self, entry: CollisionEntry):
-        print("ENEMY BASE: " + str(entry))
+        # print("ENEMY BASE: " + str(entry))
         self.flightInterruptedByCollision()
         self.phaserHitCallback(self, entry.getIntoNode())
 
     def onProjectileHitEnemyDrone(self, entry: CollisionEntry):
-        print("ENEMY DRONE: " + str(entry))
+        # print("ENEMY DRONE: " + str(entry))
         self.flightInterruptedByCollision()
         self.phaserHitCallback(self, entry.getIntoNode())
