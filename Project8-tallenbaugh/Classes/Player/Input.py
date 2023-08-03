@@ -19,6 +19,7 @@ class PlayerActionHandler:
         player_movement: ShipThrusters,
         ship_cannon: ShipCannon,
     ):
+        self.disabled = False
         self.taskMgr = base.taskMgr
         self.movement = player_movement
         self.cannon = ship_cannon
@@ -44,42 +45,67 @@ class PlayerActionHandler:
     # used to turn one-time "keyup" and "keydown" events into a continuous task called during every "frame" of the game where the button is held down.
     def headingCWKeyEvent(self, key_state: KeyState):
         if key_state == KeyState.KeyDown:
+            if self.disabled:
+                return
             self.taskMgr.add(self.movement.rotateShipHeadingCW, "rotateShipHeadingCW")
         else:
             self.taskMgr.remove("rotateShipHeadingCW")
 
     def headingCCWKeyEvent(self, key_state: KeyState):
         if key_state == KeyState.KeyDown:
+            if self.disabled:
+                return
             self.taskMgr.add(self.movement.rotateShipHeadingCCW, "rotateShipHeadingCCW")
         else:
             self.taskMgr.remove("rotateShipHeadingCCW")
 
     def pitchCWKeyEvent(self, key_state: KeyState):
         if key_state == KeyState.KeyDown:
+            if self.disabled:
+                return
             self.taskMgr.add(self.movement.rotateShipPitchCW, "rotateShipPitchCW")
         else:
             self.taskMgr.remove("rotateShipPitchCW")
 
     def pitchCCWKeyEvent(self, key_state: KeyState):
         if key_state == KeyState.KeyDown:
+            if self.disabled:
+                return
             self.taskMgr.add(self.movement.rotateShipPitchCCW, "rotateShipPitchCCW")
         else:
             self.taskMgr.remove("rotateShipPitchCCW")
 
     def rollCCWKeyEvent(self, key_state: KeyState):
         if key_state == KeyState.KeyDown:
+            if self.disabled:
+                return
             self.taskMgr.add(self.movement.rotateShipRollCCW, "rotateShipRollCCW")
         else:
             self.taskMgr.remove("rotateShipRollCCW")
 
     def rollCWKeyEvent(self, key_state: KeyState):
         if key_state == KeyState.KeyDown:
+            if self.disabled:
+                return
             self.taskMgr.add(self.movement.rotateShipRollCW, "rotateShipRollCW")
         else:
             self.taskMgr.remove("rotateShipRollCW")
 
     def thrustKeyEvent(self, key_state: KeyState):
         if key_state == KeyState.KeyDown:
+            if self.disabled:
+                return
             self.taskMgr.add(self.movement.addShipThrust, "addShipThrust")
         else:
             self.taskMgr.remove("addShipThrust")
+
+    def disable(self):
+        self.disabled = True
+        # Make sure all buttons get released otherwise player will be able to keep flying after death
+        self.headingCWKeyEvent(KeyState.KeyUp)
+        self.headingCCWKeyEvent(KeyState.KeyUp)
+        self.pitchCWKeyEvent(KeyState.KeyUp)
+        self.pitchCCWKeyEvent(KeyState.KeyUp)
+        self.rollCWKeyEvent(KeyState.KeyUp)
+        self.rollCCWKeyEvent(KeyState.KeyUp)
+        self.thrustKeyEvent(KeyState.KeyUp)

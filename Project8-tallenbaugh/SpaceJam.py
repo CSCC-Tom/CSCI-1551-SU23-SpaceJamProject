@@ -1,4 +1,5 @@
 import sys
+from enum import Enum
 from direct.showbase.ShowBase import ShowBase
 from Classes.HUD.HeadsUpDisplay import SpaceJamHeadsUpDisplay
 from Classes.SpaceJamPlayer import PlayerController
@@ -16,6 +17,12 @@ def quit():
     sys.exit()
 
 
+class GameState(Enum):
+    Active = 0
+    Victory = 1
+    Defeat = 2
+
+
 class SpaceJam(ShowBase):
     """Base class for the whole Space Jam game, that interfaces with the ShowBase of the Panda3D library."""
 
@@ -27,10 +34,12 @@ class SpaceJam(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
 
+        self.gameState = GameState.Active
+
         # Onscreen text
         self.hud = SpaceJamHeadsUpDisplay()
 
-        self.hud.addTitle("SPACE JAM CLASS EXAMPLE")
+        self.hud.addOrUpdateTitle("SPACE JAM CLASS EXAMPLE")
 
         self.assignCoreKeyBindings()
         self.enableParticles()  # <-- Particles won't work without this
@@ -65,8 +74,7 @@ class SpaceJam(ShowBase):
 
         # Player
         self.player = PlayerController(
-            self.base,
-            self.enemyBaseA.droneWasDestroyed,
+            self.base, self.enemyBaseA.droneWasDestroyed, self.onPlayerWasDestroyed
         )
 
         # Moves the ship somewhere reasonable outside of the Sun
@@ -75,7 +83,7 @@ class SpaceJam(ShowBase):
 
         # Now that the player exists, our Traverser can do its thing with it.
         self.sjTraverser.preparePlayerTraverser(
-            self.render, self.player.cNode, self.player.pusher
+            self.render, self.player.cNode, self.player.shipHull.pusher
         )
 
         # Finally Panda3D needs us to assign to this special cTrav on ShowBase to a Panda3D CollisionTraverser
@@ -84,6 +92,9 @@ class SpaceJam(ShowBase):
 
         # Debug tools
         self.debugActions = DebugActions(self.accept, self.player.movement)
+
+    def onPlayerWasDestroyed(self):
+        self.hud.addOrUpdateTitle("Sorry, You Lost.")
 
 
 app = SpaceJam()

@@ -25,20 +25,20 @@ class PhaserMissile(ProjectileCollisionHandler):
             ["%(player)ft-into-%(neutral)it", "%(player)ft-into-%(enemy)it"],
         )
         self.sceneNodeParent = base.render
-        self.modelColliderNode.cNode.setTag("player", "player")
+        self.modelColliderNode.cNode.setTag("player", "missile")
         self.phaserMissCallback = phaser_miss_callback
         self.phaserHitCallback = phaser_hit_callback
         self.modelColliderNode.modelNode.setScale(0.1)
         self.accept(
-            "player-into-neutral",
+            "missile-into-neutral",
             self.onProjectileHitEnvironment,
         )
         self.accept(
-            "player-into-base",
+            "missile-into-base",
             self.onProjectileHitEnemyBase,
         )
         self.accept(
-            "player-into-drone",
+            "missile-into-drone",
             self.onProjectileHitEnemyDrone,
         )
 

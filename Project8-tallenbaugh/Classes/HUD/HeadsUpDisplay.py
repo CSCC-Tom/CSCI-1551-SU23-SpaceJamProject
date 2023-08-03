@@ -5,16 +5,21 @@ from pandac.PandaModules import TextNode
 class SpaceJamHeadsUpDisplay:
     """Class to handle Onscreen Text stuff so that SpaceJam doesn't have to."""
 
-    def addTitle(self, text: str):
+    title: OnscreenText = None
+
+    def addOrUpdateTitle(self, text: str):
         """Function to put title on the screen."""
-        self.title = OnscreenText(
-            text=text,
-            style=1,
-            fg=(1, 1, 1, 1),
-            pos=(0.0, -0.95),
-            align=TextNode.ACenter,
-            scale=0.07,
-        )
+        if self.title == None:
+            self.title = OnscreenText(
+                text=text,
+                style=1,
+                fg=(1, 1, 1, 1),
+                pos=(0.0, -0.95),
+                align=TextNode.ACenter,
+                scale=0.07,
+            )
+        else:
+            self.title.text = text
 
     def addOnscreenCoreKeyBindings(self):
         """Function to put title on the screen."""
