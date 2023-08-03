@@ -22,7 +22,7 @@ from panda3d.core import (
 
 from direct.gui.DirectGui import *
 
-from Network import MSG_AUTH, MSG_CQUIT
+from Network import MSG_AUTH, MSG_POS, MSG_QUIT, MSG_CQUIT, MSG_CPOS, getNodePathStats
 
 
 PI = 4.0 * math.atan(1.0)
@@ -152,6 +152,7 @@ class Flatland(ShowBase):
 
     def mvPosX(self, task):
         self.fighter.setX(self.fighter, 0.4)
+        self.moved = True
         return task.cont
 
     def negX(self, keydown):
@@ -162,6 +163,7 @@ class Flatland(ShowBase):
 
     def mvNegX(self, task):
         self.fighter.setX(self.fighter, -0.4)
+        self.moved = True
         return task.cont
 
     def posY(self, keydown):
@@ -172,6 +174,7 @@ class Flatland(ShowBase):
 
     def mvPosY(self, task):
         self.fighter.setY(self.fighter, 0.4)
+        self.moved = True
         return task.cont
 
     def negY(self, keydown):
@@ -182,9 +185,10 @@ class Flatland(ShowBase):
 
     def mvNegY(self, task):
         self.fighter.setY(self.fighter, -0.4)
+        self.moved = True
         return task.cont
 
-    def tskListenerPolling(self, taskdata):
+    def tskListenerPolling(self, task):
         if self.cListener.newConnectionAvailable():
             rendezvous = PointerToConnection()
             netAddress = NetAddress()
@@ -194,31 +198,39 @@ class Flatland(ShowBase):
                 newConnection = newConnection.p()
                 self.activeConnections.append(newConnection)  # Remember connection
                 self.cReader.addConnection(newConnection)  # Begin reading connection
-        return Task.cont
+        return task.cont
 
-    def tskReaderPolling(self, taskdata):
+    def tskReaderPolling(self, task):
         if self.cReader.dataAvailable():
             datagram = NetDatagram()  # catch the incoming data in this instance
             # Check the return value; if we were threaded, someone else could have
             # snagged this data before we did
             if self.cReader.getData(datagram):
                 self.receiveMsgFromClient(datagram)
-        return Task.cont
+
+        if self.moved == True:
+            for conn in self.Clients.keys():
+                if conn != self.tcpSocket:
+                    # Only send to clients, not to self.
+                    self.cWriter.send(self.datagramPosMsg(), conn)
+
+        return task.cont
 
     def initClientFighter(self, playerID, conn, pos, hpr):
-        self.Clients[conn] = playerID
-        self.PlayerList[playerID] = [0, 0, 0, 1, 0, 0]
-        self.clientFighter = self.loader.loadModel("./Assets/cube")
-        self.clientFighter.reparentTo(self.render)
-        self.clientFighter.setColorScale(0, 0, 1.0, 1.0)
-        self.Models[playerID] = self.clientFighter
-        self.clientCNode = CollisionNode("clientFighterC")
+        clientFighter = self.loader.loadModel("./Assets/cube")
+        clientFighter.reparentTo(self.render)
+        clientFighter.setColorScale(0, 0, 1.0, 1.0)
+        self.clientCNode = CollisionNode("clientFighterC" + playerID)
         self.clientCNode.addSolid(CollisionSphere(0, 0, 0, 1.05))
-        self.clientFighter.attachNewNode(self.clientCNode)
+        clientFighter.attachNewNode(self.clientCNode)
+        clientFighter.setPos(pos)
+        clientFighter.setHpr(hpr)
+
+        self.Clients[conn] = playerID
+        self.PlayerList[playerID] = [pos[0], pos[1], pos[2], hpr[0], hpr[1], hpr[2]]
+        self.Models[playerID] = clientFighter
         self.CollSpheres[playerID] = self.clientCNode.getSolid(0)
         self.CollNodes[playerID] = self.clientCNode
-        self.clientFighter.setPos(pos)
-        self.clientFighter.setHpr(hpr)
 
     def deleteClientFighter(self, playerID, conn):
         self.Clients.pop(conn)
@@ -247,10 +259,39 @@ class Flatland(ShowBase):
                     myIterator.getFloat64(),
                 ),
             )
-
+            self.cWriter.send(self.datagramPosMsg(), datagram.getConnection())
+        elif msgID == MSG_CPOS:
+            print("CPOS from " + str(datagram.getConnection()))
+            self.Models[msg_player_id].setPos(
+                (
+                    myIterator.getFloat64(),
+                    myIterator.getFloat64(),
+                    myIterator.getFloat64(),
+                )
+            )
+            self.Models[msg_player_id].setHpr(
+                (
+                    myIterator.getFloat64(),
+                    myIterator.getFloat64(),
+                    myIterator.getFloat64(),
+                )
+            )
         elif msgID == MSG_CQUIT:
             print("CQUIT from " + str(datagram.getConnection()))
             self.deleteClientFighter(msg_player_id, datagram.getConnection())
+
+    def datagramPosMsg(self):
+        posMsg = NetDatagram()
+        posMsg.addUint8(MSG_POS)
+        pos = self.fighter.getPos()
+        hpr = self.fighter.getHpr()
+        posMsg.addFloat64(pos[0])
+        posMsg.addFloat64(pos[1])
+        posMsg.addFloat64(pos[2])
+        posMsg.addFloat64(hpr[0])
+        posMsg.addFloat64(hpr[1])
+        posMsg.addFloat64(hpr[2])
+        return posMsg
 
     def initNetworkServer(self):
         self.cManager = QueuedConnectionManager()
@@ -271,6 +312,8 @@ class Flatland(ShowBase):
 
         self.cListener.addConnection(self.tcpSocket)
 
+        self.moved = False
+
         # Python dictionaries to hold data
         self.Clients = {}  # PlayerID by Connection
         self.PlayerList = {}  # Player Stats by PlayerID
@@ -282,7 +325,7 @@ class Flatland(ShowBase):
         self.taskMgr.add(self.tskReaderPolling, "Poll the connection reader", -40)
 
         self.Clients[self.tcpSocket] = self.myID
-        self.PlayerList[self.myID] = [0, 0, 1, 0, 0, 0]
+        self.PlayerList[self.myID] = getNodePathStats(self.fighter)
         self.Models[self.myID] = self.fighter
         self.CollSpheres[self.myID] = self.cNode.getSolid(0)
         self.CollNodes[self.myID] = self.cNode
