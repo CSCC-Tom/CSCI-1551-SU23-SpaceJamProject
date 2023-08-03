@@ -1,8 +1,7 @@
-import math, sys, random, os
+import math, sys, random
 from direct.showbase.ShowBase import ShowBase
 
 from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
 from pandac.PandaModules import TextNode
 from panda3d.core import (
     Vec3,
@@ -11,13 +10,10 @@ from panda3d.core import (
     CollisionSphere,
     CollisionNode,
     QueuedConnectionManager,
-    QueuedConnectionListener,
     QueuedConnectionReader,
     ConnectionWriter,
     NetDatagram,
     DatagramIterator,
-    PointerToConnection,
-    NetAddress,
 )
 
 from direct.gui.DirectGui import *
@@ -140,7 +136,10 @@ class Flatland(ShowBase):
     # Prepare message if server wants to quit
     def quit(self):
         ## Network contacts will go here
-        self.cWriter.send(self.datagramCQuitMsg(), self.myConnection)
+        if not self.myConnection:
+            sys.exit()
+        if not self.cWriter.send(self.datagramCQuitMsg(), self.myConnection):
+            sys.exit()
         self.cManager.closeConnection(self.myConnection)
         sys.exit()
 
@@ -189,26 +188,6 @@ class Flatland(ShowBase):
         self.moved = True
         return task.cont
 
-    def datagramAuthMsg(self):
-        authMsg = NetDatagram()
-        authMsg.addUint8(MSG_AUTH)
-        authMsg.addString(self.myID)
-        pos = self.fighter.getPos()
-        hpr = self.fighter.getHpr()
-        authMsg.addFloat64(pos[0])
-        authMsg.addFloat64(pos[1])
-        authMsg.addFloat64(pos[2])
-        authMsg.addFloat64(hpr[0])
-        authMsg.addFloat64(hpr[1])
-        authMsg.addFloat64(hpr[2])
-        return authMsg
-
-    def datagramCQuitMsg(self):
-        quitMsg = NetDatagram()
-        quitMsg.addUint8(MSG_CQUIT)
-        quitMsg.addString(self.myID)
-        return quitMsg
-
     def tskReaderPolling(self, task):
         if self.cReader.dataAvailable():
             datagram = NetDatagram()  # catch the incoming data in this instance
@@ -220,6 +199,7 @@ class Flatland(ShowBase):
         if self.moved == True:
             if self.myConnection:
                 self.cWriter.send(self.datagramCPosMsg(), self.myConnection)
+                self.moved = False
 
         return task.cont
 
@@ -240,7 +220,7 @@ class Flatland(ShowBase):
         myIterator = DatagramIterator(datagram)
         msgID = myIterator.getUint8()
         if msgID == MSG_POS:
-            print("POS from " + str(datagram.getConnection()))
+            # print("POS from " + str(datagram.getConnection()))
             self.serverFighter.setPos(
                 (
                     myIterator.getFloat64(),
@@ -259,6 +239,26 @@ class Flatland(ShowBase):
         elif msgID == MSG_QUIT:
             print("QUIT from " + str(datagram.getConnection()))
             self.deleteServerFighter()
+
+    def datagramAuthMsg(self):
+        authMsg = NetDatagram()
+        authMsg.addUint8(MSG_AUTH)
+        authMsg.addString(self.myID)
+        pos = self.fighter.getPos()
+        hpr = self.fighter.getHpr()
+        authMsg.addFloat64(pos[0])
+        authMsg.addFloat64(pos[1])
+        authMsg.addFloat64(pos[2])
+        authMsg.addFloat64(hpr[0])
+        authMsg.addFloat64(hpr[1])
+        authMsg.addFloat64(hpr[2])
+        return authMsg
+
+    def datagramCQuitMsg(self):
+        quitMsg = NetDatagram()
+        quitMsg.addUint8(MSG_CQUIT)
+        quitMsg.addString(self.myID)
+        return quitMsg
 
     def datagramCPosMsg(self):
         cposMsg = NetDatagram()
@@ -297,6 +297,7 @@ class Flatland(ShowBase):
             self.cReader.addConnection(
                 self.myConnection
             )  # receive messages from server
+            print("AUTHED to " + str(self.myConnection))
             self.taskMgr.add(self.tskReaderPolling, "Poll the connection reader", -40)
 
             self.initServerFighter((0, 0, 0), (0, 0, 0))

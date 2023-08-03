@@ -1,8 +1,6 @@
-import math, sys, random, os
+import math, sys, random
 from direct.showbase.ShowBase import ShowBase
-from direct.task.Task import Task
 from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
 from pandac.PandaModules import TextNode
 from panda3d.core import (
     Vec3,
@@ -141,6 +139,10 @@ class Flatland(ShowBase):
     # Prepare message if server wants to quit
     def quit(self):
         ## Network contacts will go here
+        for conn in self.Clients.keys():
+            if conn != self.tcpSocket:
+                self.cWriter.send(self.datagramQuitMsg(), conn)
+                self.cManager.closeConnection(conn)
         sys.exit()
 
     # methods for arrow key movement
@@ -213,6 +215,7 @@ class Flatland(ShowBase):
                 if conn != self.tcpSocket:
                     # Only send to clients, not to self.
                     self.cWriter.send(self.datagramPosMsg(), conn)
+                    self.moved = False
 
         return task.cont
 
@@ -259,9 +262,8 @@ class Flatland(ShowBase):
                     myIterator.getFloat64(),
                 ),
             )
-            self.cWriter.send(self.datagramPosMsg(), datagram.getConnection())
         elif msgID == MSG_CPOS:
-            print("CPOS from " + str(datagram.getConnection()))
+            # print("CPOS from " + str(datagram.getConnection()))
             self.Models[msg_player_id].setPos(
                 (
                     myIterator.getFloat64(),
@@ -292,6 +294,11 @@ class Flatland(ShowBase):
         posMsg.addFloat64(hpr[1])
         posMsg.addFloat64(hpr[2])
         return posMsg
+
+    def datagramQuitMsg(self):
+        quitMsg = NetDatagram()
+        quitMsg.addUint8(MSG_QUIT)
+        return quitMsg
 
     def initNetworkServer(self):
         self.cManager = QueuedConnectionManager()
